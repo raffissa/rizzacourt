@@ -1,11 +1,59 @@
+/* ============================================================
+   SUPABASE CONNECTION
+   ============================================================ */
+const SUPABASE_URL = "https://iwfwiptyxivwskiwgqli.supabase.co";
+const SUPABASE_KEY = "sb_publishable_h_W5SMVPfV71725u5v4Ajw_tl9-qP5w";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 /* ============================================================================================
    STATE — everything lives in memory for this prototype (no real cloud DB / auth in this demo)
    ============================================================================================ */
 const CATS = ["Apparel","Footwear","Electronics","Beauty","Home","Dining"];
 const THUMB = {Apparel:"👕",Footwear:"👟",Electronics:"🎧",Beauty:"💄",Home:"🛋️",Dining:"☕"};
 const THUMB_BG = {Apparel:"#FBEFE1",Footwear:"#E7F0EC",Electronics:"#E9EEF6",Beauty:"#FBE7EF",Home:"#F3EFE3",Dining:"#F0E7DB"};
+async function loadTransactions() {
 
-const ADMIN_ACCOUNT = { email:"rizzacourt@gmail.com", password:"Clarissa.1065", name:"Court Admin" };
+  const { data, error } = await supabaseClient
+    .from("transactions")
+    .select(`
+      *,
+      transaction_items (*)
+    `)
+    .order("date", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    toast("Could not load transactions.", "⚠");
+    return;
+  }
+
+  transactions = data.map(t => ({
+    id: t.id,
+    customerId: t.customer_id,
+    customerName: t.customer_name,
+    items: t.transaction_items.map(item => ({
+      name: item.name,
+      qty: item.qty,
+      price: Number(item.price),
+      discount: Number(item.discount),
+      category: item.category,
+      productId: item.product_id
+    })),
+    subtotal: Number(t.subtotal),
+    discount: Number(t.discount),
+    vat: Number(t.vat),
+    total: Number(t.total),
+    cost: Number(t.cost),
+    profit: Number(t.profit),
+    method: t.method,
+    status: t.status,
+    location: t.location,
+    date: t.date,
+    cashGiven: t.cash_given,
+    change: t.change
+  }));
+}
+
 
 let state = {
   currentUser:null, // {role, id, name, email, phone, address, username}
@@ -29,66 +77,80 @@ function mkCustomer(name,email,phone,address,regDate,password){
   return {id:nextCustomerId++, name,email,phone,address,status:"Active",regDate,username:name.split(" ")[0].toLowerCase(),password:password||"clarissadelposo"};
 }
 
-let products = [
-  mkProduct("Windbreak Field Jacket","Apparel",2400,4200,18,10,"Store 1"),
-  mkProduct("Court Classic Sneakers","Footwear",1800,3200,6,0,"Store 1"),
-  mkProduct("Wireless Over-Ear Headphones","Electronics",2600,4800,24,20,"Store 2"),
-  mkProduct("Matte Velvet Lipstick","Beauty",180,420,60,0,"Store 2"),
-  mkProduct("Ceramic Pour-Over Set","Home",650,1150,15,0,"Store 3"),
-  mkProduct("Single-Origin Beans 250g","Dining",220,380,40,15,"Store 3"),
-  mkProduct("Tailored Wool Trousers","Apparel",1900,3600,9,0,"Store 1"),
-  mkProduct("Trail Running Shoes","Footwear",2100,3800,4,0,"Store 1"),
-  mkProduct("Smart Fitness Band","Electronics",1400,2600,30,0,"Store 2"),
-  mkProduct("Hydrating Face Serum","Beauty",520,980,22,25,"Store 2"),
-  mkProduct("Linen Throw Pillow Set","Home",380,720,17,0,"Store 3"),
-  mkProduct("Belgian Waffle Mix","Dining",140,260,55,0,"Store 3"),
-];
+let products = [];
+async function loadProducts() {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("id");
 
-let customers = [
-  mkCustomer("Ranulfa A. Delposo","ranulfa@gmail.com","+63 917 111 2222","Baguio City","2026-08-31"),
-  mkCustomer("Clarissa A. Delposo","clarissa@gmail.com","+63 917 333 4444","Bagiuio City","2026-08-31"),
-  mkCustomer("Victor Delposo","victor@gmail.com","+63 917 555 6666","Montalban, Manila","2026-08-31"),
-  mkCustomer("Raffy R. Belesta", "rappidoo6@gmail.com", "+63 969 211 4942", "Consolacion, Dalaguete, cebu", "2026-08-31"),
-];
+  if (error) {
+    console.error("Error loading products:", error);
+    toast("Could not load products.", "⚠");
+    return;
+  }
 
-let locations = [
-  {id:1,branch:"Rizza Court — Main",mall:"Rizza Court",address:"123 Osmeña Blvd",city:"Cebu City",province:"Cebu",contact:"+63 32 555 0182",hours:"9:00 AM – 9:00 PM",desc:"Flagship branch with all six categories."},
-  {id:2,branch:"Rizza Court — North Wing",mall:"Rizza Court",address:"Purok 1, Consolacion",city:"Dalaguete",province:"Cebu",contact:"+63 32 555 0341",hours:"10:00 AM – 9:00 PM",desc:"Electronics, beauty and home goods."},
-  {id:3,branch:"Rizza Court — Coastal",mall:"Rizza Court",address:"Poblacion",city:"Argao",province:"Cebu",contact:"+63 32 555 0509",hours:"9:00 AM – 10:00 PM",desc:"Dining and lifestyle-focused branch."},
-];
-let nextLocationId = locations.length + 1;
+  products = data.map(p => ({
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    description: p.description || "",
+    cost: Number(p.cost),
+    price: Number(p.price),
+    stock: Number(p.stock),
+    discount: Number(p.discount),
+    store: p.store || "",
+    status: p.status,
+    dateAdded: p.date_added
+  }));
+}
+let customers = [];
 
-let discounts = [
-  {id:1,name:"Weekend Sale",pct:20,scope:"Apparel & Footwear",start:"2026-08-22",end:"2026-09-15",active:true},
-  {id:2,name:"Flash Sale — Electronics",pct:15,scope:"Electronics",start:"2026-08-25",end:"2026-09-02",active:true},
-  {id:3,name:"Member Discount",pct:10,scope:"Storewide",start:"2026-01-01",end:"2026-12-31",active:true},
-  {id:4,name:"Back to School",pct:25,scope:"Home & Dining",start:"2026-06-01",end:"2026-07-31",active:false},
-];
-let nextDiscountId = discounts.length + 1;
+let locations = [];
+async function loadLocations() {
+  const { data, error } = await supabaseClient
+    .from("locations")
+    .select("*")
+    .order("id");
+
+  if (error) {
+    console.error("Error loading locations:", error);
+    toast("Could not load locations.", "⚠");
+    return;
+  }
+
+  locations = data;
+}
+
+let discounts = [];
+async function loadDiscounts() {
+  const { data, error } = await supabaseClient
+    .from("discounts")
+    .select("*")
+    .order("id");
+
+  if (error) {
+    console.error("Error loading discounts:", error);
+    return;
+  }
+
+  discounts = data.map(d => ({
+    id: d.id,
+    name: d.name,
+    pct: Number(d.pct),
+    scope: d.scope,
+    start: d.start_date,
+    end: d.end_date,
+    active: d.active
+  }));
+}
 
 let transactions = []; // built up as users check out; seeded below
 let nextTxId = 1;
 let cart = []; // {productId, qty}
 
-seedTransactions();
 
-function seedTransactions(){
-  const seedData = [
-    {custIdx:0,items:[[0,1],[3,2]],days:1,method:"Card",status:"Completed"},
-    {custIdx:1,items:[[2,1]],days:3,method:"E-Wallet",status:"Completed"},
-    {custIdx:0,items:[[5,3],[10,1]],days:6,method:"Cash",status:"Completed",cashGiven:2500},
-    {custIdx:2,items:[[6,1]],days:8,method:"Card",status:"Refunded"},
-    {custIdx:1,items:[[8,1],[9,1]],days:12,method:"E-Wallet",status:"Completed"},
-    {custIdx:2,items:[[11,4]],days:15,method:"Cash",status:"Pending",cashGiven:1200},
-    {custIdx:0,items:[[7,1]],days:20,method:"Card",status:"Completed"},
-  ];
-  seedData.forEach(sd=>{
-    const cust = customers[sd.custIdx];
-    const items = sd.items.map(([pIdx,qty])=>({product:products[pIdx],qty}));
-    const date = new Date(); date.setDate(date.getDate()-sd.days);
-    transactions.push(buildTransaction(cust,items,sd.method,sd.status,date,sd.cashGiven));
-  });
-}
+
 
 function buildTransaction(customer,items,method,status,date,cashGiven){
   let subtotal=0, discountTotal=0;
@@ -115,6 +177,8 @@ function buildTransaction(customer,items,method,status,date,cashGiven){
   };
 }
 
+let sessionReady = false;
+
 /* ============================================================================================
    NAVIGATION
    ============================================================================================ */
@@ -137,6 +201,12 @@ function gotoPage(pageId){
   document.querySelectorAll(".nav-link").forEach(a=>a.classList.remove("active"));
   const navLink = document.querySelector(`.nav-link[data-goto="${pageId}"]`);
   if(navLink) navLink.classList.add("active");
+
+  // Remember the last page so a browser refresh does not send the user
+  // back to the login/landing page. Explicit logout clears this state.
+  if(pageId !== "login") {
+    try { localStorage.setItem("rizza_last_page", pageId); } catch(err) {}
+  }
 }
 
 document.addEventListener("click",(e)=>{
@@ -172,53 +242,130 @@ function selectLoginRole(role){
   document.getElementById("loginSubmitBtn").textContent = role==="admin" ? "Login as Admin" : "Login as Customer";
 }
 
-document.getElementById("loginForm").addEventListener("submit",(e)=>{
+document.getElementById("loginForm").addEventListener("submit",async (e)=>{
   e.preventDefault();
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
-  if(state.loginRole==="admin"){
-    if(email.toLowerCase()!==ADMIN_ACCOUNT.email.toLowerCase() || password!==ADMIN_ACCOUNT.password){
-      toast("Incorrect admin email or password.","⚠");
-      return;
-    }
-    state.currentUser = {role:"admin", name:ADMIN_ACCOUNT.name, email:ADMIN_ACCOUNT.email};
-    toast("Welcome back, Admin.");
-    gotoPage("app-admin");
-    setAdminTab("overview");
-  } else {
-    const match = customers.find(c=>c.email.toLowerCase()===email.toLowerCase());
-    if(!match || match.password!==password){
-      toast("Incorrect email or password.","⚠");
-      return;
-    }
-    if(match.status==="Disabled"){ toast("This account has been disabled. Contact support.","⚠"); return; }
-    state.currentUser = {role:"user", ...match};
-    toast(`Welcome back, ${match.name.split(" ")[0]}!`);
-    gotoPage("app-user");
-    setUserTab("home");
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if(error){
+    console.error(error);
+    toast("Incorrect email or password.","⚠");
+    return;
   }
+
+  const user = data.user;
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if(profileError){
+    console.error(profileError);
+    await supabaseClient.auth.signOut();
+    toast("Could not load your account profile.","⚠");
+    return;
+  }
+
+  if(profile.status === "Disabled"){
+    await supabaseClient.auth.signOut();
+    toast("This account has been disabled. Contact support.","⚠");
+    return;
+  }
+
+  state.currentUser = {
+    role: profile.role,
+    id: profile.id,
+    name: profile.name || "",
+    email: user.email || "",
+    phone: profile.phone || "",
+    address: profile.address || "",
+    username: profile.username || "",
+    regDate: profile.created_at || null,
+    status: profile.status
+  };
+
+  if(state.loginRole === "admin" && profile.role !== "admin"){
+    await supabaseClient.auth.signOut();
+    state.currentUser = null;
+    toast("This account does not have administrator access.","⚠");
+    return;
+  }
+
+  if(state.loginRole === "user" && profile.role === "admin"){
+    await supabaseClient.auth.signOut();
+    state.currentUser = null;
+    toast("Please use the Admin login.","⚠");
+    return;
+  }
+
+  toast(`Welcome back, ${state.currentUser.name.split(" ")[0] || "User"}!`);
+  gotoPage(profile.role === "admin" ? "app-admin" : "app-user");
+  if(profile.role === "admin") setAdminTab("overview");
+  else setUserTab("home");
   e.target.reset();
 });
 
-document.getElementById("signupForm").addEventListener("submit",(e)=>{
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+
   e.preventDefault();
+
+  const name = document.getElementById("suName").value.trim();
+  const username = document.getElementById("suUsername").value.trim();
   const email = document.getElementById("suEmail").value.trim();
-  const pw = document.getElementById("suPassword").value;
-  const cpw = document.getElementById("suConfirm").value;
-  if(pw!==cpw){ toast("Passwords don't match — try again.","⚠"); return; }
-  if(customers.some(c=>c.email.toLowerCase()===email.toLowerCase())){ toast("An account with that email already exists.","⚠"); return; }
-  const newCust = mkCustomer(
-    document.getElementById("suName").value,
+  const phone = document.getElementById("suPhone").value.trim();
+  const address = document.getElementById("suAddress").value.trim();
+
+  const password = document.getElementById("suPassword").value;
+  const confirmPassword = document.getElementById("suConfirm").value;
+
+  if (password !== confirmPassword) {
+    toast("Passwords don't match — try again.", "⚠");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({
     email,
-    document.getElementById("suPhone").value,
-    document.getElementById("suAddress").value,
-    new Date().toISOString().slice(0,10),
-    pw
-  );
-  newCust.username = document.getElementById("suUsername").value;
-  customers.push(newCust);
+    password
+  });
+
+  if (error) {
+    console.error(error);
+    toast(error.message, "⚠");
+    return;
+  }
+
+  const user = data.user;
+
+  if (!user) {
+    toast("Please check your email to confirm your account.");
+    return;
+  }
+
+  const { error: profileError } = await supabaseClient
+    .from("profiles")
+    .insert({
+      id: user.id,
+      name,
+      username,
+      phone,
+      address,
+      role: "user",
+      status: "Active"
+    });
+
+  if (profileError) {
+    console.error(profileError);
+    toast("Account created, but profile setup failed.", "⚠");
+    return;
+  }
+
   toast("Account created! Please log in.");
+
   e.target.reset();
+
   gotoPage("login");
   selectLoginRole("user");
 });
@@ -266,6 +413,12 @@ function effectivePrice(p){ return p.price * (1 - p.discount/100); }
    ============================================================================================ */
 function setAdminTab(tab){
   state.adminTab = tab;
+  try {
+    localStorage.setItem("rizza_admin_tab", tab);
+    if(state.currentUser?.role === "admin") {
+      localStorage.setItem("rizza_last_page", "app-admin");
+    }
+  } catch(err) {}
   document.querySelectorAll('#page-app-admin .side-link').forEach(l=>l.classList.remove("active"));
   const link = document.querySelector(`#page-app-admin [data-admin-tab="${tab}"]`);
   if(link) link.classList.add("active");
@@ -503,7 +656,7 @@ function openProductModal(id){
       <div class="field"><label>Discount (%)</label><input id="pmDiscount" type="number" value="${editing?editing.discount:0}"></div>
     </div>
     <div class="field"><label>Status</label><select id="pmStatus"><option ${!editing||editing.status==="Enabled"?"selected":""}>Enabled</option><option ${editing&&editing.status==="Disabled"?"selected":""}>Disabled</option></select></div>
-  `,()=>{
+  `,async ()=>{
     const name=document.getElementById("pmName").value.trim();
     const cost=+document.getElementById("pmCost").value||0;
     const price=+document.getElementById("pmPrice").value||0;
@@ -517,16 +670,112 @@ function openProductModal(id){
       store:document.getElementById("pmStore").value,
       status:document.getElementById("pmStatus").value,
     };
-    if(editing){ Object.assign(editing,data); toast("Product updated."); }
-    else { products.push({id:nextProductId++,dateAdded:new Date().toISOString().slice(0,10),...data}); toast("Product added."); }
-    renderAdminProductGrid();
-    return true;
+    if (editing) {
+
+  const { data: updated, error } = await supabaseClient
+    .from("products")
+    .update({
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      cost: data.cost,
+      price: data.price,
+      stock: data.stock,
+      discount: data.discount,
+      store: data.store,
+      status: data.status
+    })
+    .eq("id", editing.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    toast("Failed to update product.", "⚠");
+    return false;
+  }
+
+  Object.assign(editing, {
+    id: updated.id,
+    name: updated.name,
+    category: updated.category,
+    description: updated.description,
+    cost: Number(updated.cost),
+    price: Number(updated.price),
+    stock: Number(updated.stock),
+    discount: Number(updated.discount),
+    store: updated.store,
+    status: updated.status,
+    dateAdded: updated.date_added
+  });
+
+  toast("Product updated.");
+
+} else {
+
+  const { data: created, error } = await supabaseClient
+    .from("products")
+    .insert({
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      cost: data.cost,
+      price: data.price,
+      stock: data.stock,
+      discount: data.discount,
+      store: data.store,
+      status: data.status
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    toast("Failed to add product.", "⚠");
+    return false;
+  }
+
+  products.push({
+    id: created.id,
+    name: created.name,
+    category: created.category,
+    description: created.description,
+    cost: Number(created.cost),
+    price: Number(created.price),
+    stock: Number(created.stock),
+    discount: Number(created.discount),
+    store: created.store,
+    status: created.status,
+    dateAdded: created.date_added
+  });
+
+  toast("Product added.");
+}
+
+renderAdminProductGrid();
+return true;
   });
 }
 
-function deleteProduct(id){
-  if(!confirm("Delete this product? This cannot be undone.")) return;
-  products = products.filter(p=>p.id!==id);
+async function deleteProduct(id) {
+
+  if (!confirm("Delete this product? This cannot be undone.")) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    toast("Failed to delete product.", "⚠");
+    return;
+  }
+
+  products = products.filter(p => p.id !== id);
+
   toast("Product deleted.");
   renderAdminProductGrid();
 }
@@ -842,10 +1091,46 @@ function renderAdminAccount(main){
   `;
   main.appendChild(panel);
 }
-function saveAdminAccount(){
-  state.currentUser.name = document.getElementById("admName").value;
-  state.currentUser.email = document.getElementById("admEmail").value;
-  toast("Admin profile updated.");
+async function saveAdminAccount(){
+  const u = state.currentUser;
+  if(!u || !u.id){
+    toast("You are not signed in.","⚠");
+    return;
+  }
+
+  const name = document.getElementById("admName").value.trim();
+  const email = document.getElementById("admEmail").value.trim();
+
+  if(!name || !email){
+    toast("Name and email are required.","⚠");
+    return;
+  }
+
+  const { error: profileError } = await supabaseClient
+    .from("profiles")
+    .update({ name })
+    .eq("id", u.id);
+
+  if(profileError){
+    console.error(profileError);
+    toast("Failed to save admin profile.","⚠");
+    return;
+  }
+
+  if(email !== u.email){
+    const { error: authError } = await supabaseClient.auth.updateUser({ email });
+    if(authError){
+      console.error(authError);
+      toast("Name saved, but the email could not be updated.","⚠");
+      return;
+    }
+    toast("Profile saved. Check your new email to confirm the email change.");
+  } else {
+    toast("Admin profile saved successfully.");
+  }
+
+  u.name = name;
+  u.email = email;
   renderAdminAccount(document.getElementById("adminMain"));
 }
 
@@ -854,6 +1139,7 @@ function saveAdminAccount(){
    ============================================================================================ */
 function setUserTab(tab){
   state.userTab = tab;
+  try { localStorage.setItem("rizza_user_tab", tab); } catch(err) {}
   document.querySelectorAll('#page-app-user .side-link').forEach(l=>l.classList.remove("active"));
   const link = document.querySelector(`#page-app-user [data-user-tab="${tab}"]`);
   if(link) link.classList.add("active");
@@ -1161,14 +1447,47 @@ function renderUserAccount(main){
   `;
   main.appendChild(panel);
 }
-function saveUserAccount(){
+async function saveUserAccount(){
   const u = state.currentUser;
-  u.name = document.getElementById("accName").value;
-  u.phone = document.getElementById("accPhone").value;
-  u.address = document.getElementById("accAddress").value;
+  if(!u || !u.id){
+    toast("You are not signed in.","⚠");
+    return;
+  }
+
+  const name = document.getElementById("accName").value.trim();
+  const phone = document.getElementById("accPhone").value.trim();
+  const address = document.getElementById("accAddress").value.trim();
+
+  if(!name){
+    toast("Full name is required.","⚠");
+    return;
+  }
+
+  const { data: updatedProfile, error } = await supabaseClient
+    .from("profiles")
+    .update({ name, phone, address })
+    .eq("id", u.id)
+    .select("*")
+    .single();
+
+  if(error){
+    console.error(error);
+    toast("Failed to save your profile.","⚠");
+    return;
+  }
+
+  u.name = updatedProfile.name;
+  u.phone = updatedProfile.phone || "";
+  u.address = updatedProfile.address || "";
+
   const custRecord = customers.find(c=>c.id===u.id);
-  if(custRecord){ custRecord.name=u.name; custRecord.phone=u.phone; custRecord.address=u.address; }
-  toast("Account updated.");
+  if(custRecord){
+    custRecord.name = u.name;
+    custRecord.phone = u.phone;
+    custRecord.address = u.address;
+  }
+
+  toast("Account saved successfully.");
   renderUserMain();
 }
 
@@ -1249,5 +1568,209 @@ function toggleTheme(){
   if(saved==="1") applyTheme(true);
 })();
 
-/* Initial view */
-gotoPage("landing");
+function startRealtime() {
+
+  supabaseClient
+    .channel("products-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "products"
+      },
+      async () => {
+        console.log("Products changed. Reloading...");
+        await loadProducts();
+
+        if (state.adminTab === "products") {
+          renderAdminMain();
+        }
+
+        if (state.userTab === "shop") {
+          renderUserMain();
+        }
+      }
+    )
+    .subscribe();
+
+
+  supabaseClient
+    .channel("transactions-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "transactions"
+      },
+      async () => {
+        console.log("Transactions changed.");
+
+        await loadTransactions();
+
+        if (state.adminTab === "overview") {
+          renderAdminMain();
+        }
+
+        if (state.adminTab === "transactions") {
+          renderAdminMain();
+        }
+
+        if (state.adminTab === "sales") {
+          renderAdminMain();
+        }
+
+        if (state.adminTab === "profits") {
+          renderAdminMain();
+        }
+      }
+    )
+    .subscribe();
+}
+
+
+
+/* Initial view is decided by restoreSession() after Supabase session check. */
+seedTransactions();
+
+/* ============================================================
+   SESSION + PROFILE PERSISTENCE
+   Restores the signed-in admin/customer after page refresh.
+   ============================================================ */
+async function restoreSession(){
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+  if(error){
+    console.error("Session restore error:", error);
+    sessionReady = true;
+    gotoPage("landing");
+    return;
+  }
+
+  if(!session?.user){
+    state.currentUser = null;
+    sessionReady = true;
+    gotoPage("landing");
+    return;
+  }
+
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .single();
+
+  if(profileError || !profile){
+    console.error("Profile restore error:", profileError);
+    state.currentUser = null;
+    sessionReady = true;
+    gotoPage("landing");
+    return;
+  }
+
+  if(profile.status === "Disabled"){
+    await supabaseClient.auth.signOut();
+    state.currentUser = null;
+    sessionReady = true;
+    gotoPage("landing");
+    return;
+  }
+
+  state.currentUser = {
+    role: profile.role,
+    id: profile.id,
+    name: profile.name || "",
+    email: session.user.email || "",
+    phone: profile.phone || "",
+    address: profile.address || "",
+    username: profile.username || "",
+    regDate: profile.created_at || null,
+    status: profile.status
+  };
+
+  let savedTab = null;
+  try {
+    savedTab = localStorage.getItem(
+      profile.role === "admin" ? "rizza_admin_tab" : "rizza_user_tab"
+    );
+  } catch(err) {}
+
+  sessionReady = true;
+
+  // IMPORTANT: restore the authenticated app BEFORE rendering the UI.
+  // This prevents the initial landing/login page from winning a race on refresh.
+  if(profile.role === "admin"){
+    state.adminTab = savedTab || "overview";
+    gotoPage("app-admin");
+    renderAdminMain();
+    setAdminTab(state.adminTab);
+  } else {
+    state.userTab = savedTab || "home";
+    gotoPage("app-user");
+    renderUserMain();
+    setUserTab(state.userTab);
+  }
+}
+
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if(event === "SIGNED_OUT"){
+    state.currentUser = null;
+    try {
+      localStorage.removeItem("rizza_last_page");
+      localStorage.removeItem("rizza_admin_tab");
+      localStorage.removeItem("rizza_user_tab");
+    } catch(err) {}
+    return;
+  }
+
+  if((event === "SIGNED_IN" || event === "USER_UPDATED") && session?.user){
+    // Session is restored separately; this keeps the in-memory profile current.
+    const { data: profile } = await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+
+    if(profile){
+      state.currentUser = {
+        role: profile.role,
+        id: profile.id,
+        name: profile.name || "",
+        email: session.user.email || "",
+        phone: profile.phone || "",
+        address: profile.address || "",
+        username: profile.username || "",
+        regDate: profile.created_at || null,
+        status: profile.status
+      };
+    }
+  }
+});
+
+async function initializeOnlineData(){
+  // Restore Supabase authentication first. The UI must not decide the initial
+  // page until we know whether a session exists.
+  await restoreSession();
+
+  await Promise.all([
+    loadProducts(),
+    loadLocations(),
+    loadDiscounts(),
+    loadTransactions()
+  ]);
+
+  // Re-render the already-restored section after online data arrives.
+  if(state.currentUser?.role === "admin"){
+    renderAdminMain();
+    setAdminTab(state.adminTab);
+  } else if(state.currentUser?.role === "user"){
+    renderUserMain();
+    setUserTab(state.userTab);
+  }
+
+  startRealtime();
+  console.log("Rizza Court online data initialized.");
+}
+
+initializeOnlineData();
