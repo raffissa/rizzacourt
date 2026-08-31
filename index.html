@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rizza Court — Mall POS &amp; Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================ TOASTS ============================================================ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ============================================================ MARKETING SITE ============================================================ -->
+<div id="site">
+  <nav class="site-nav">
+    <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
+    <div class="nav-links">
+      <a href="#" data-goto="landing" class="nav-link active">Home</a>
+      <a href="#" data-goto="about" class="nav-link">About</a>
+      <a href="#" data-goto="locations" class="nav-link">Locations</a>
+      <a href="#" data-goto="contact" class="nav-link">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <button class="theme-toggle" id="themeToggleNav" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+      <button class="btn btn-outline btn-sm" data-goto="login">Login</button>
+      <button class="btn btn-primary btn-sm" data-goto="signup">Sign Up</button>
+    </div>
+  </nav>
+
+  <!-- ---------- LANDING ---------- -->
+  <section id="page-landing" class="page">
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">Mall POS &amp; Shopping System</div>
+          <h1>One court.<br><em>Every store,</em><br>one register.</h1>
+          <p>A modern mall shopping and point-of-sale system that gives customers a convenient way to shop, while giving administrators full control over products, customers, locations, sales, profit and discounts — from a single dashboard.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-goto="login">Login</button>
+            <button class="btn btn-outline" data-goto="signup">Sign Up</button>
+            <button class="btn btn-outline" data-goto="app-user" data-user-tab="shop">Explore Products →</button>
+          </div>
+        </div>
+        <div class="directory">
+          <div class="directory-head"><h3>Court Directory</h3><span>LVL 1–3</span></div>
+          <div class="directory-row"><span class="lvl">L1</span><span class="lbl">Fashion &amp; Apparel<small>42 stores</small></span><span class="tag">Open</span></div>
+          <div class="directory-row"><span class="lvl">L1</span><span class="lbl">Footwear &amp; Accessories<small>18 stores</small></span><span class="tag">Open</span></div>
+          <div class="directory-row"><span class="lvl">L2</span><span class="lbl">Electronics &amp; Home<small>27 stores</small></span><span class="tag">Open</span></div>
+          <div class="directory-row"><span class="lvl">L2</span><span class="lbl">Beauty &amp; Wellness<small>15 stores</small></span><span class="tag">Open</span></div>
+          <div class="directory-row" style="border-bottom:none;"><span class="lvl">L3</span><span class="lbl">Dining &amp; Cafés<small>21 stores</small></span><span class="tag">Open</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section on-ivory">
+      <div class="section-head">
+        <div class="eyebrow">Why Rizza Court</div>
+        <h2>Built for how malls actually run</h2>
+        <p>Every checkout, discount and delivery in one system — so admins manage the floor and customers get a shop that just works.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card"><div class="ico">◆</div><h4>Real-time inventory</h4><p>Stock, pricing and profit recalculate the moment a sale is rung up, across every branch.</p></div>
+        <div class="info-card"><div class="ico">%</div><h4>Live promotions</h4><p>Flash sales and member discounts activate and expire automatically — no manual cleanup.</p></div>
+        <div class="info-card"><div class="ico">◈</div><h4>Role-based access</h4><p>Admins manage the mall. Customers shop safely. Neither can touch the other's tools.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- ABOUT ---------- -->
+  <section id="page-about" class="page hidden">
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">About Rizza Court</div>
+        <h2>A mall built around one shopping account</h2>
+        <p>Rizza Court brings together fashion, electronics, beauty, dining and home goods under one roof — and one system. Every purchase, discount and receipt lives in your account, no matter which store on the floor you bought from.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card"><div class="ico">🛍</div><h4>Products offered</h4><p>Apparel, footwear, electronics, beauty, home goods and dining — over 4,000 SKUs across 6 categories.</p></div>
+        <div class="info-card"><div class="ico">⚙</div><h4>Services</h4><p>Personal styling, gift wrapping, click-and-collect, and a concierge desk on Level 1.</p></div>
+        <div class="info-card"><div class="ico">🏬</div><h4>Store branches</h4><p>Three branches across Cebu City, Dalaguete, and Argao, each independently stocked.</p></div>
+        <div class="info-card"><div class="ico">👤</div><h4>Customer experience</h4><p>Browse, save favorites, track orders and re-order in a few taps from any device.</p></div>
+        <div class="info-card"><div class="ico">📊</div><h4>Business information</h4><p>Founded 2016. Family-owned, independently operated, 180+ tenant stores mall-wide.</p></div>
+        <div class="info-card"><div class="ico">🏷</div><h4>Promotions</h4><p>Rotating flash sales, seasonal markdowns and a members-only discount tier.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- LOCATIONS (public) ---------- -->
+  <section id="page-locations" class="page hidden">
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">Find a branch</div>
+        <h2>Three branches, one account</h2>
+        <p>Stock and promotions are managed per branch — check hours before you head over.</p>
+      </div>
+      <div class="card-grid" id="publicLocationsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ---------- CONTACT ---------- -->
+  <section id="page-contact" class="page hidden">
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">Get in touch</div>
+        <h2>Contact Rizza Court</h2>
+        <p>Questions about an order, a store, or a partnership — send us a note.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+        <div class="info-card">
+          <h4>Head Office</h4>
+          <p style="margin-top:10px;">123 Osmeña Boulevard, Cebu City, 6000, Philippines</p>
+          <p style="margin-top:14px;"><strong>Phone</strong><br>+63 32 555 0182</p>
+          <p style="margin-top:14px;"><strong>Email</strong><br>hello@rizzacourt.example</p>
+          <p style="margin-top:14px;"><strong>Business hours</strong><br>Mon–Sun, 9:00 AM – 9:00 PM</p>
+        </div>
+        <form class="form-card" id="contactForm">
+          <div class="field"><label>Full Name</label><input type="text" required placeholder="Juana Dela Cruz"></div>
+          <div class="field"><label>Email</label><input type="email" required placeholder="you@email.com"></div>
+          <div class="field"><label>Message</label><textarea rows="4" required placeholder="How can we help?"></textarea></div>
+          <button class="btn btn-dark btn-block" type="submit">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div>© 2026 Rizza Court Mall POS &amp; Management System — vibe build</div>
+    <div>Cebu City · Dalaguete · Argao</div>
+  </footer>
+</div>
+
+<!-- ============================================================ AUTH ============================================================ -->
+<div id="page-login" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <a href="#" class="auth-back" data-goto="landing">← Back to Rizza Court</a>
+      <div class="auth-card">
+        <h3 style="margin-bottom:6px;">Sign in</h3>
+        <p style="color:var(--muted);font-size:13.5px;margin-bottom:22px;">Choose an account type to continue.</p>
+        <div class="role-pick">
+          <div class="role-card selected" id="rolePickUser" onclick="selectLoginRole('user')">
+            <div class="emoji">👤</div><div class="name">User / Customer</div><div class="sub">Shop &amp; track orders</div>
+          </div>
+          <div class="role-card" id="rolePickAdmin" onclick="selectLoginRole('admin')">
+            <div class="emoji">🛡️</div><div class="name">Admin</div><div class="sub">Manage the mall</div>
+          </div>
+        </div>
+        <form id="loginForm">
+          <div class="field"><label>Username or Email</label><input type="text" id="loginEmail" placeholder="e.g. juana@email.com" required></div>
+          <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
+          <div class="checkbox-row">
+            <label><input type="checkbox" checked> Remember me</label>
+            <a href="#" id="forgotPasswordLink" style="color:var(--gold);">Forgot password?</a>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" id="loginSubmitBtn">Login as Customer</button>
+        </form>
+        <div class="auth-switch">Don't have an account? <a href="#" data-goto="signup">Sign up</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-signup" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-box" style="max-width:480px;">
+      <a href="#" class="auth-back" data-goto="landing">← Back to Rizza Court</a>
+      <div class="auth-card">
+        <h3 style="margin-bottom:6px;">Create your account</h3>
+        <p style="color:var(--muted);font-size:13.5px;margin-bottom:22px;">Sign up as a customer to start shopping. Admin accounts are issued internally.</p>
+        <form id="signupForm">
+          <div class="field-row">
+            <div class="field"><label>Full Name</label><input type="text" id="suName" required placeholder="Juana Dela Cruz"></div>
+            <div class="field"><label>Username</label><input type="text" id="suUsername" required placeholder="juanadc"></div>
+          </div>
+          <div class="field"><label>Email</label><input type="email" id="suEmail" required placeholder="you@email.com"></div>
+          <div class="field-row">
+            <div class="field"><label>Phone Number</label><input type="tel" id="suPhone" required placeholder="+63 900 000 0000"></div>
+            <div class="field"><label>Address</label><input type="text" id="suAddress" required placeholder="City, Province"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Password</label><input type="password" id="suPassword" required placeholder="••••••••"></div>
+            <div class="field"><label>Confirm Password</label><input type="password" id="suConfirm" required placeholder="••••••••"></div>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+        </form>
+        <div class="auth-switch">Already have an account? <a href="#" data-goto="login">Log in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ ADMIN APP ============================================================ -->
+<div id="page-app-admin" class="page hidden">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
+      <div class="side-role-tag">🛡️ ADMIN CONSOLE</div>
+      <a class="side-link" data-admin-tab="overview"><span class="em">📊</span> Dashboard</a>
+      <a class="side-link" data-admin-tab="products"><span class="em">📦</span> Products</a>
+      <a class="side-link" data-admin-tab="customers"><span class="em">👥</span> Customers</a>
+      <a class="side-link" data-admin-tab="transactions"><span class="em">🧾</span> Transactions</a>
+      <a class="side-link" data-admin-tab="sales"><span class="em">💰</span> Sales</a>
+      <a class="side-link" data-admin-tab="profits"><span class="em">📈</span> Profits</a>
+      <a class="side-link" data-admin-tab="discounts"><span class="em">🏷️</span> Discounts</a>
+      <a class="side-link" data-admin-tab="locations"><span class="em">📍</span> Locations</a>
+      <a class="side-link" data-admin-tab="settings"><span class="em">⚙️</span> Settings</a>
+      <a class="side-link" data-admin-tab="account"><span class="em">👤</span> Admin Account</a>
+      <div class="side-spacer"></div>
+      <button class="theme-toggle side-theme-toggle" id="themeToggleAdmin" title="Toggle dark mode" aria-label="Toggle dark mode">🌙 <span>Dark Mode</span></button>
+      <div class="side-foot">
+        <a class="side-link" style="color:rgba(250,247,240,.72);" data-goto="landing">🚪 Logout</a>
+        Signed in as Admin
+      </div>
+    </aside>
+    <main class="app-main" id="adminMain"></main>
+  </div>
+</div>
+
+<!-- ============================================================ USER APP ============================================================ -->
+<div id="page-app-user" class="page hidden">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
+      <div class="side-role-tag">👤 CUSTOMER</div>
+      <a class="side-link" data-user-tab="home"><span class="em">🏠</span> Home</a>
+      <a class="side-link" data-user-tab="shop"><span class="em">🛍️</span> Shop</a>
+      <a class="side-link" data-user-tab="discounts"><span class="em">🏷️</span> Discounts</a>
+      <a class="side-link" data-user-tab="cart"><span class="em">🛒</span> Cart <span id="cartCountBadge" style="margin-left:auto;background:var(--gold);color:var(--navy-3);border-radius:999px;font-size:10.5px;padding:1px 7px;"></span></a>
+      <a class="side-link" data-user-tab="transactions"><span class="em">🧾</span> My Transactions</a>
+      <a class="side-link" data-user-tab="account"><span class="em">👤</span> My Account</a>
+      <a class="side-link" data-user-tab="locations"><span class="em">📍</span> Locations</a>
+      <a class="side-link" data-user-tab="contact"><span class="em">📞</span> Contact</a>
+      <div class="side-spacer"></div>
+      <button class="theme-toggle side-theme-toggle" id="themeToggleUser" title="Toggle dark mode" aria-label="Toggle dark mode">🌙 <span>Dark Mode</span></button>
+      <div class="side-foot">
+        <a class="side-link" style="color:rgba(250,247,240,.72);" data-goto="landing">🚪 Logout</a>
+        <span id="userSideName">Signed in</span>
+      </div>
+    </aside>
+    <main class="app-main" id="userMain"></main>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
