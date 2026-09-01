@@ -106,6 +106,31 @@ async function loadProducts() {
 }
 let customers = [];
 
+async function loadCustomers(){
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("role", "user")
+    .order("created_at", { ascending: false });
+
+  if(error){
+    console.error("Error loading customers:", error);
+    toast("Could not load customers.", "⚠");
+    return;
+  }
+
+  customers = (data || []).map(c => ({
+    id: c.id,
+    name: c.name || "",
+    email: c.email || "",
+    phone: c.phone || "",
+    address: c.address || "",
+    status: c.status || "Active",
+    regDate: c.created_at || null,
+    username: c.username || ""
+  }));
+}
+
 let locations = [];
 async function loadLocations() {
   const { data, error } = await supabaseClient
@@ -119,7 +144,17 @@ async function loadLocations() {
     return;
   }
 
-  locations = data;
+  locations = data.map(l => ({
+    id: l.id,
+    branch: l.branch,
+    mall: l.mall || "Rizza Court",
+    address: l.address || "",
+    city: l.city || "",
+    province: l.province || "",
+    contact: l.contact || "",
+    hours: l.hours || "",
+    desc: l.description || l.desc || ""
+  }));
 }
 
 let discounts = [];
@@ -209,10 +244,77 @@ function gotoPage(pageId){
   }
 }
 
+/* Ends the Supabase session so a refresh after logout does NOT restore
+   the account. onAuthStateChange("SIGNED_OUT") clears state.currentUser
+   and the cached tab/page keys; we still navigate immediately so the UI
+   doesn't wait on that async event to feel responsive. */
+async function performLogout(){
+  try {
+    await supabaseClient.auth.signOut();
+  } catch(err) {
+    console.error("Logout error:", err);
+  }
+  state.currentUser = null;
+  try {
+    localStorage.removeItem("rizza_last_page");
+    localStorage.removeItem("rizza_admin_tab");
+    localStorage.removeItem("rizza_user_tab");
+  } catch(err) {}
+  gotoPage("landing");
+  toast("You've been logged out.","👋");
+}
+
+/* ============================================================
+   RESPONSIVE / MOBILE NAV
+   ============================================================ */
+function closeMobileSidebar(){
+  document.getElementById("adminSidebar")?.classList.remove("open");
+  document.getElementById("userSidebar")?.classList.remove("open");
+  document.getElementById("sidebarOverlay")?.classList.remove("visible");
+  document.getElementById("sidebarToggle")?.setAttribute("aria-expanded","false");
+}
+function toggleMobileSidebar(){
+  // Toggle whichever app sidebar is currently visible.
+  const sidebar = document.querySelector("#page-app-admin:not(.hidden) #adminSidebar, #page-app-user:not(.hidden) #userSidebar");
+  if(!sidebar) return;
+  const willOpen = !sidebar.classList.contains("open");
+  sidebar.classList.toggle("open", willOpen);
+  document.getElementById("sidebarOverlay")?.classList.toggle("visible", willOpen);
+  document.getElementById("sidebarToggle")?.setAttribute("aria-expanded", String(willOpen));
+}
+document.getElementById("sidebarToggle")?.addEventListener("click", toggleMobileSidebar);
+document.getElementById("sidebarOverlay")?.addEventListener("click", closeMobileSidebar);
+
+function closeMobileNav(){
+  document.getElementById("navLinks")?.classList.remove("open");
+  document.getElementById("navMenuToggle")?.setAttribute("aria-expanded","false");
+}
+document.getElementById("navMenuToggle")?.addEventListener("click", ()=>{
+  const nav = document.getElementById("navLinks");
+  const willOpen = !nav.classList.contains("open");
+  nav.classList.toggle("open", willOpen);
+  document.getElementById("navMenuToggle").setAttribute("aria-expanded", String(willOpen));
+});
+
+// Collapse mobile menus once the viewport is wide enough that they render
+// as a normal sidebar/top nav again, so no leftover "open" state lingers.
+window.addEventListener("resize", ()=>{
+  if(window.innerWidth > 980){ closeMobileSidebar(); closeMobileNav(); }
+});
+
 document.addEventListener("click",(e)=>{
+  const logoutEl = e.target.closest("[data-logout]");
+  if(logoutEl){
+    e.preventDefault();
+    closeMobileSidebar();
+    closeMobileNav();
+    performLogout();
+    return;
+  }
   const gotoEl = e.target.closest("[data-goto]");
   if(gotoEl){
     e.preventDefault();
+    closeMobileNav();
     const dest = gotoEl.getAttribute("data-goto");
     if(dest==="app-user"){
       const tab = gotoEl.getAttribute("data-user-tab");
@@ -229,9 +331,9 @@ document.addEventListener("click",(e)=>{
     }
   }
   const adminTabEl = e.target.closest("[data-admin-tab]");
-  if(adminTabEl){ setAdminTab(adminTabEl.getAttribute("data-admin-tab")); }
+  if(adminTabEl){ setAdminTab(adminTabEl.getAttribute("data-admin-tab")); closeMobileSidebar(); }
   const userTabEl = e.target.closest("[data-user-tab]");
-  if(userTabEl && !gotoEl){ setUserTab(userTabEl.getAttribute("data-user-tab")); }
+  if(userTabEl && !gotoEl){ setUserTab(userTabEl.getAttribute("data-user-tab")); closeMobileSidebar(); }
 });
 
 /* ---------- Login role pick ---------- */
@@ -988,30 +1090,61 @@ function renderDiscountTable(){
     </tr>`).join("");
 }
 function openDiscountModal(id){
-  const editing = id?discounts.find(d=>d.id===id):null;
-  buildModal(editing?"Edit Discount":"Add Discount",`
+  const editing = id ? discounts.find(d=>d.id===id) : null;
+  buildModal(editing ? "Edit Discount" : "Add Discount", `
     <div class="field"><label>Promotion Name</label><input id="dmName" value="${editing?editing.name:""}" placeholder="e.g. Flash Sale"></div>
     <div class="field-row">
-      <div class="field"><label>Discount %</label><input id="dmPct" type="number" value="${editing?editing.pct:10}"></div>
+      <div class="field"><label>Discount %</label><input id="dmPct" type="number" min="0" max="100" value="${editing?editing.pct:10}"></div>
       <div class="field"><label>Scope</label><select id="dmScope"><option ${editing&&editing.scope==="Storewide"?"selected":""}>Storewide</option>${CATS.map(c=>`<option ${editing&&editing.scope===c?"selected":""}>${c}</option>`).join("")}</select></div>
     </div>
     <div class="field-row">
       <div class="field"><label>Start Date</label><input id="dmStart" type="date" value="${editing?editing.start:new Date().toISOString().slice(0,10)}"></div>
       <div class="field"><label>Expiration Date</label><input id="dmEnd" type="date" value="${editing?editing.end:""}"></div>
     </div>
-  `,()=>{
+  `, async ()=>{
     const name=document.getElementById("dmName").value.trim();
+    const pct=Math.max(0,Math.min(100,+document.getElementById("dmPct").value||0));
+    const scope=document.getElementById("dmScope").value;
+    const start=document.getElementById("dmStart").value;
     const end=document.getElementById("dmEnd").value;
-    if(!name||!end){ toast("Please name the promotion and set an end date.","⚠"); return false; }
-    const data={name,pct:+document.getElementById("dmPct").value||0,scope:document.getElementById("dmScope").value,start:document.getElementById("dmStart").value,end,active:true};
-    if(editing) Object.assign(editing,data); else discounts.push({id:nextDiscountId++,...data});
-    toast(editing?"Promotion updated.":"Promotion created.");
+    if(!name||!start||!end){ toast("Please complete the promotion details.","⚠"); return false; }
+    if(new Date(end)<new Date(start)){ toast("Expiration date cannot be before the start date.","⚠"); return false; }
+
+    const payload={name,pct,scope,start_date:start,end_date:end,active:true};
+    let result;
+    if(editing){
+      result=await supabaseClient.from("discounts").update(payload).eq("id",editing.id).select().single();
+    } else {
+      result=await supabaseClient.from("discounts").insert(payload).select().single();
+    }
+    if(result.error){ console.error("Discount save error:",result.error); toast(`Failed to save discount: ${result.error.message}`,"⚠"); return false; }
+
+    const d=result.data;
+    const mapped={id:d.id,name:d.name,pct:Number(d.pct),scope:d.scope,start:d.start_date,end:d.end_date,active:d.active};
+    if(editing) Object.assign(editing,mapped); else discounts.push(mapped);
+    toast(editing?"Promotion updated successfully.":"Promotion created successfully.");
     renderDiscountTable();
     return true;
   });
 }
-function toggleDiscount(id){ const d=discounts.find(x=>x.id===id); d.active=!d.active; renderDiscountTable(); toast(`Promotion ${d.active?"activated":"deactivated"}.`); }
-function deleteDiscount(id){ if(!confirm("Delete this promotion?"))return; discounts=discounts.filter(d=>d.id!==id); renderDiscountTable(); toast("Promotion deleted."); }
+
+async function toggleDiscount(id){
+  const d=discounts.find(x=>x.id===id); if(!d) return;
+  const {data,error}=await supabaseClient.from("discounts").update({active:!d.active}).eq("id",id).select().single();
+  if(error){ console.error(error); toast("Failed to update promotion.","⚠"); return; }
+  d.active=data.active;
+  renderDiscountTable();
+  toast(`Promotion ${d.active?"activated":"deactivated"}.`);
+}
+
+async function deleteDiscount(id){
+  if(!confirm("Delete this promotion?")) return;
+  const {error}=await supabaseClient.from("discounts").delete().eq("id",id);
+  if(error){ console.error(error); toast("Failed to delete promotion.","⚠"); return; }
+  discounts=discounts.filter(d=>d.id!==id);
+  renderDiscountTable();
+  toast("Promotion deleted.");
+}
 
 /* ---------- Locations ---------- */
 function renderAdminLocations(main){
@@ -1039,8 +1172,8 @@ function renderLocationGrid(){
     </div>`).join("");
 }
 function openLocationModal(id){
-  const editing = id?locations.find(l=>l.id===id):null;
-  buildModal(editing?"Edit Location":"Add Location",`
+  const editing = id ? locations.find(l=>l.id===id) : null;
+  buildModal(editing ? "Edit Location" : "Add Location", `
     <div class="field"><label>Branch Name</label><input id="lmBranch" value="${editing?editing.branch:""}"></div>
     <div class="field"><label>Complete Address</label><input id="lmAddress" value="${editing?editing.address:""}"></div>
     <div class="field-row">
@@ -1052,17 +1185,43 @@ function openLocationModal(id){
       <div class="field"><label>Opening Hours</label><input id="lmHours" value="${editing?editing.hours:"9:00 AM – 9:00 PM"}"></div>
     </div>
     <div class="field"><label>Store Description</label><textarea id="lmDesc" rows="2">${editing?editing.desc:""}</textarea></div>
-  `,()=>{
+  `, async ()=>{
     const branch=document.getElementById("lmBranch").value.trim();
     if(!branch){ toast("Please name the branch.","⚠"); return false; }
-    const data={branch,mall:"Rizza Court",address:document.getElementById("lmAddress").value,city:document.getElementById("lmCity").value,province:document.getElementById("lmProvince").value,contact:document.getElementById("lmContact").value,hours:document.getElementById("lmHours").value,desc:document.getElementById("lmDesc").value};
-    if(editing) Object.assign(editing,data); else locations.push({id:nextLocationId++,...data});
-    toast(editing?"Location updated.":"Location added.");
+    const payload={
+      branch,
+      mall:"Rizza Court",
+      address:document.getElementById("lmAddress").value.trim(),
+      city:document.getElementById("lmCity").value.trim(),
+      province:document.getElementById("lmProvince").value.trim(),
+      contact:document.getElementById("lmContact").value.trim(),
+      hours:document.getElementById("lmHours").value.trim(),
+      description:document.getElementById("lmDesc").value.trim()
+    };
+    let result;
+    if(editing){
+      result=await supabaseClient.from("locations").update(payload).eq("id",editing.id).select().single();
+    } else {
+      result=await supabaseClient.from("locations").insert(payload).select().single();
+    }
+    if(result.error){ console.error("Location save error:",result.error); toast(`Failed to save location: ${result.error.message}`,"⚠"); return false; }
+    const l=result.data;
+    const mapped={id:l.id,branch:l.branch,mall:l.mall||"Rizza Court",address:l.address||"",city:l.city||"",province:l.province||"",contact:l.contact||"",hours:l.hours||"",desc:l.description||""};
+    if(editing) Object.assign(editing,mapped); else locations.push(mapped);
+    toast(editing?"Location updated successfully.":"Location added successfully.");
     renderLocationGrid(); renderPublicLocations();
     return true;
   });
 }
-function deleteLocation(id){ if(!confirm("Delete this location?"))return; locations=locations.filter(l=>l.id!==id); renderLocationGrid(); renderPublicLocations(); toast("Location deleted."); }
+
+async function deleteLocation(id){
+  if(!confirm("Delete this location?")) return;
+  const {error}=await supabaseClient.from("locations").delete().eq("id",id);
+  if(error){ console.error(error); toast("Failed to delete location.","⚠"); return; }
+  locations=locations.filter(l=>l.id!==id);
+  renderLocationGrid(); renderPublicLocations();
+  toast("Location deleted.");
+}
 
 /* ---------- Settings & Admin Account ---------- */
 function renderAdminSettings(main){
@@ -1250,7 +1409,7 @@ function renderUserDiscounts(main){
 function renderUserCart(main){
   main.innerHTML = `<div class="app-topbar"><div><h2>Cart</h2><div class="sub">Review items before checkout.</div></div></div>`;
   if(cart.length===0){ main.innerHTML += emptyState("🛒","Your cart is empty","Add something from the Shop to get started."); return; }
-  const wrap = document.createElement("div"); wrap.style.display="grid"; wrap.style.gridTemplateColumns="1.6fr 1fr"; wrap.style.gap="20px";
+  const wrap = document.createElement("div"); wrap.className="split-panel";
   const left = document.createElement("div"); left.className="panel";
   left.innerHTML = cart.map(line=>{
     const p = products.find(x=>x.id===line.productId);
@@ -1306,7 +1465,7 @@ function renderUserCheckout(main){
   if(cart.length===0){ main.innerHTML = `<div class="app-topbar"><div><h2>Checkout</h2></div></div>` + emptyState("🛒","Your cart is empty","Add items to your cart before checking out."); return; }
   const totals = cartTotals();
   main.innerHTML = `<div class="app-topbar"><div><h2>Checkout</h2><div class="sub">Confirm your order and payment method.</div></div></div>`;
-  const wrap = document.createElement("div"); wrap.style.display="grid"; wrap.style.gridTemplateColumns="1.6fr 1fr"; wrap.style.gap="20px";
+  const wrap = document.createElement("div"); wrap.className="split-panel";
   const left = document.createElement("div"); left.className="panel";
   left.innerHTML = `<div class="panel-head"><h3>Order Summary</h3></div>
     <table><thead><tr><th>Product</th><th>Qty</th><th>Subtotal</th></tr></thead><tbody>
@@ -1352,24 +1511,95 @@ function renderUserCheckout(main){
   syncCashField();
 }
 
-function placeOrder(){
-  const method = document.getElementById("payMethod").value;
+async function placeOrder(){
+  if(!state.currentUser?.id){ toast("Please sign in before checking out.","⚠"); return; }
+  if(!cart.length){ toast("Your cart is empty.","⚠"); return; }
+
+  const method = document.getElementById("payMethod")?.value || "Cash";
   const totals = cartTotals();
   let cashGiven = null;
   if(method==="Cash"){
-    cashGiven = +document.getElementById("cashGivenInput").value || 0;
+    cashGiven = +document.getElementById("cashGivenInput")?.value || 0;
     if(cashGiven<=0){ toast("Enter the amount of cash given.","⚠"); return; }
     if(cashGiven<totals.total){ toast("Cash given is less than the total due.","⚠"); return; }
   }
+
   const items = cart.map(line=>({product:products.find(p=>p.id===line.productId),qty:line.qty}));
-  const tx = buildTransaction(state.currentUser,items,method,"Completed",new Date(),cashGiven);
-  transactions.push(tx);
-  items.forEach(it=>{ it.product.stock = Math.max(0,it.product.stock-it.qty); });
-  cart = [];
-  state.pendingReceipt = tx;
+  if(items.some(it=>!it.product)){ toast("One or more products are no longer available.","⚠"); return; }
+  if(items.some(it=>it.qty>it.product.stock)){ toast("Some items no longer have enough stock.","⚠"); await loadProducts(); renderUserMain(); return; }
+
+  const location = locations[0]?.branch || "Main Branch";
+  const txId = `TXN-${Date.now()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+  const date = new Date().toISOString();
+  let cost=0;
+  items.forEach(it=>cost += it.product.cost*it.qty);
+  const afterDiscount = totals.subtotal-totals.discount;
+  const profit = afterDiscount-cost;
+  const change = method==="Cash" ? cashGiven-totals.total : null;
+
+  const transactionRow={
+    id:txId,
+    customer_id:state.currentUser.id,
+    customer_name:state.currentUser.name,
+    subtotal:totals.subtotal,
+    discount:totals.discount,
+    vat:totals.vat,
+    total:totals.total,
+    cost,
+    profit,
+    method,
+    status:"Completed",
+    location,
+    date,
+    cash_given:cashGiven,
+    change
+  };
+
+  const {data:createdTx,error:txError}=await supabaseClient
+    .from("transactions").insert(transactionRow).select().single();
+  if(txError){ console.error("Transaction save error:",txError); toast(`Checkout failed: ${txError.message}`,"⚠"); return; }
+
+  const itemRows=items.map(it=>({
+    transaction_id:createdTx.id,
+    product_id:it.product.id,
+    name:it.product.name,
+    qty:it.qty,
+    price:it.product.price,
+    discount:it.product.discount,
+    category:it.product.category
+  }));
+  const {error:itemError}=await supabaseClient.from("transaction_items").insert(itemRows);
+  if(itemError){
+    console.error("Transaction items error:",itemError);
+    await supabaseClient.from("transactions").delete().eq("id",createdTx.id);
+    toast(`Checkout failed while saving items: ${itemError.message}`,"⚠");
+    return;
+  }
+
+  for(const it of items){
+    const newStock=Math.max(0,it.product.stock-it.qty);
+    const {error:stockError}=await supabaseClient.from("products").update({stock:newStock}).eq("id",it.product.id);
+    if(stockError){
+      console.error("Stock update error:",stockError);
+      toast("Order saved, but stock update failed. Please check the product stock.","⚠");
+    }
+  }
+
+  const tx={
+    id:createdTx.id,
+    customerId:createdTx.customer_id,
+    customerName:createdTx.customer_name,
+    items:items.map(it=>({name:it.product.name,qty:it.qty,price:it.product.price,discount:it.product.discount,category:it.product.category,productId:it.product.id})),
+    subtotal:Number(createdTx.subtotal),discount:Number(createdTx.discount),vat:Number(createdTx.vat),total:Number(createdTx.total),cost:Number(createdTx.cost),profit:Number(createdTx.profit),
+    method:createdTx.method,status:createdTx.status,location:createdTx.location,date:createdTx.date,cashGiven:createdTx.cash_given,change:createdTx.change
+  };
+
+  transactions.unshift(tx);
+  await loadProducts();
+  cart=[];
+  state.pendingReceipt=tx;
   updateCartBadge();
   toast("Order placed! Here's your receipt.");
-  state.userTab = "receipt";
   setUserTab("receipt");
 }
 
@@ -1523,7 +1753,21 @@ function buildModal(title,bodyHtml,onSave,cancelLabel="Cancel"){
   document.body.appendChild(overlay);
   overlay.addEventListener("click",(e)=>{ if(e.target===overlay) overlay.remove(); });
   document.getElementById("modalCancelBtn").addEventListener("click",()=>overlay.remove());
-  if(onSave){ document.getElementById("modalSaveBtn").addEventListener("click",()=>{ if(onSave()!==false) overlay.remove(); }); }
+  if(onSave){
+    document.getElementById("modalSaveBtn").addEventListener("click", async ()=>{
+      const btn=document.getElementById("modalSaveBtn");
+      btn.disabled=true;
+      try {
+        const result=await onSave();
+        if(result!==false) overlay.remove();
+      } catch(err) {
+        console.error("Modal save error:",err);
+        toast("Something went wrong while saving.","⚠");
+      } finally {
+        if(document.body.contains(btn)) btn.disabled=false;
+      }
+    });
+  }
   return overlay;
 }
 function emptyState(icon,title,sub){
@@ -1596,6 +1840,28 @@ function startRealtime() {
 
 
   supabaseClient
+    .channel("profiles-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "profiles"
+      },
+      async () => {
+        console.log("Profiles changed. Reloading customers...");
+        await loadCustomers();
+
+        if (state.adminTab === "customers" || state.adminTab === "overview") {
+          renderAdminMain();
+          setAdminTab(state.adminTab);
+        }
+      }
+    )
+    .subscribe();
+
+
+  supabaseClient
     .channel("transactions-realtime")
     .on(
       "postgres_changes",
@@ -1632,7 +1898,6 @@ function startRealtime() {
 
 
 /* Initial view is decided by restoreSession() after Supabase session check. */
-seedTransactions();
 
 /* ============================================================
    SESSION + PROFILE PERSISTENCE
@@ -1721,6 +1986,11 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
       localStorage.removeItem("rizza_admin_tab");
       localStorage.removeItem("rizza_user_tab");
     } catch(err) {}
+    // Only redirect if we're not already on a public page — this listener
+    // can fire after performLogout() already navigated us to landing.
+    const inApp = !document.getElementById("page-app-admin")?.classList.contains("hidden")
+               || !document.getElementById("page-app-user")?.classList.contains("hidden");
+    if(inApp) gotoPage("landing");
     return;
   }
 
@@ -1755,6 +2025,7 @@ async function initializeOnlineData(){
 
   await Promise.all([
     loadProducts(),
+    loadCustomers(),
     loadLocations(),
     loadDiscounts(),
     loadTransactions()
