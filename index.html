@@ -18,7 +18,8 @@
 <div id="site">
   <nav class="site-nav">
     <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
-    <div class="nav-links">
+    <button class="nav-menu-toggle" id="navMenuToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    <div class="nav-links" id="navLinks">
       <a href="#" data-goto="landing" class="nav-link active">Home</a>
       <a href="#" data-goto="about" class="nav-link">About</a>
       <a href="#" data-goto="locations" class="nav-link">Locations</a>
@@ -109,7 +110,7 @@
         <h2>Contact Rizza Court</h2>
         <p>Questions about an order, a store, or a partnership — send us a note.</p>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+      <div class="contact-grid">
         <div class="info-card">
           <h4>Head Office</h4>
           <p style="margin-top:10px;">123 Osmeña Boulevard, Cebu City, 6000, Philippines</p>
@@ -193,10 +194,14 @@
   </div>
 </div>
 
+<!-- Shared mobile sidebar controls (used by both admin and user app shells) -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <!-- ============================================================ ADMIN APP ============================================================ -->
 <div id="page-app-admin" class="page hidden">
   <div class="app-shell">
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="adminSidebar">
       <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
       <div class="side-role-tag">🛡️ ADMIN CONSOLE</div>
       <a class="side-link" data-admin-tab="overview"><span class="em">📊</span> Dashboard</a>
@@ -212,7 +217,7 @@
       <div class="side-spacer"></div>
       <button class="theme-toggle side-theme-toggle" id="themeToggleAdmin" title="Toggle dark mode" aria-label="Toggle dark mode">🌙 <span>Dark Mode</span></button>
       <div class="side-foot">
-        <a class="side-link" style="color:rgba(250,247,240,.72);" data-goto="landing">🚪 Logout</a>
+        <a class="side-link" style="color:rgba(250,247,240,.72);" href="#" data-logout="1">🚪 Logout</a>
         Signed in as Admin
       </div>
     </aside>
@@ -223,7 +228,7 @@
 <!-- ============================================================ USER APP ============================================================ -->
 <div id="page-app-user" class="page hidden">
   <div class="app-shell">
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="userSidebar">
       <div class="brand"><span class="brand-mark">R</span> Rizza Court</div>
       <div class="side-role-tag">👤 CUSTOMER</div>
       <a class="side-link" data-user-tab="home"><span class="em">🏠</span> Home</a>
@@ -237,7 +242,7 @@
       <div class="side-spacer"></div>
       <button class="theme-toggle side-theme-toggle" id="themeToggleUser" title="Toggle dark mode" aria-label="Toggle dark mode">🌙 <span>Dark Mode</span></button>
       <div class="side-foot">
-        <a class="side-link" style="color:rgba(250,247,240,.72);" data-goto="landing">🚪 Logout</a>
+        <a class="side-link" style="color:rgba(250,247,240,.72);" href="#" data-logout="1">🚪 Logout</a>
         <span id="userSideName">Signed in</span>
       </div>
     </aside>
