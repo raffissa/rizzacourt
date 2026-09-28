@@ -195,8 +195,8 @@ footer.site-footer{background:var(--navy-3);color:rgba(250,247,240,0.6);padding:
 .app-topbar .sub{color:var(--muted);font-size:13.5px;margin-top:4px;}
 .topbar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .search-box{position:relative;}
-.search-box input{padding:9px 14px 9px 32px;border-radius:8px;border:1px solid var(--border);font-size:13.5px;width:220px;background:var(--paper);}
-.search-box::before{content:"•";position:absolute;left:11px;top:8px;color:var(--muted);}
+.search-box input{padding:9px 14px;border-radius:8px;border:1px solid var(--border);font-size:13.5px;width:220px;background:var(--paper);}
+
 
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
 .kpi-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:20px 20px 18px;position:relative;overflow:hidden;}
@@ -243,7 +243,7 @@ tbody tr:hover{background:var(--row-hover);}
 .prod-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:.15s;}
 .prod-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
 .prod-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden;cursor:pointer;}
-.prod-thumb:hover::after{content:"🔍 View";position:absolute;inset:0;background:rgba(11,22,38,0.5);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.prod-thumb:hover::after{content:"ðŸ” View";position:absolute;inset:0;background:rgba(11,22,38,0.5);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;}
 .prod-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .prod-thumb .disc-tag{position:absolute;top:9px;left:9px;background:var(--coral);color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;font-family:'IBM Plex Mono',monospace;z-index:2;}
 .prod-body{padding:14px 14px 16px;flex:1;display:flex;flex-direction:column;}
@@ -389,4 +389,553 @@ tbody tr:hover{background:var(--row-hover);}
   .cart-line > *:nth-child(4){grid-area:price;}
   .cart-line > *:nth-child(5){grid-area:total;justify-self:end;}
   .cart-line > *:nth-child(6){grid-area:remove;justify-self:end;}
+}
+
+/* ============================================================
+   REFINEMENT LAYER â€” UI/UX ONLY
+   Preserves the existing component structure and functionality.
+   ============================================================ */
+:root{
+  --surface-soft:#F7F4EC;
+  --gold-deep:#A98612;
+  --focus-ring:0 0 0 3px rgba(231,205,122,.38);
+  --shadow-soft:0 10px 30px rgba(18,33,61,.07);
+}
+
+html{scroll-behavior:smooth;}
+body{line-height:1.45;}
+button,input,select,textarea{transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease,transform .16s ease;}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:0;box-shadow:var(--focus-ring);}
+.skip-link{position:fixed;left:16px;top:10px;z-index:300;padding:9px 13px;border-radius:8px;background:var(--gold);color:var(--navy-3);font-weight:700;font-size:13px;transform:translateY(-160%);transition:transform .16s ease;}
+.skip-link:focus{transform:translateY(0);}
+
+/* More deliberate hierarchy and calmer surfaces. */
+.site-nav{min-height:68px;box-shadow:0 4px 22px rgba(0,0,0,.10);}
+.nav-links a{position:relative;}
+.nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:center;transition:transform .16s ease;}
+.nav-links a:hover::after,.nav-links a.active::after{transform:scaleX(1);}
+.hero{isolation:isolate;}
+.hero::after{content:"";position:absolute;width:420px;height:420px;right:-160px;top:-180px;border:1px solid rgba(231,205,122,.10);border-radius:50%;pointer-events:none;}
+.hero-grid,.section{position:relative;z-index:1;}
+.hero-actions .btn{min-height:44px;}
+.hero-actions .btn-primary{box-shadow:0 8px 20px rgba(201,162,39,.18);}
+
+.info-card,.branch-card,.form-card,.panel,.kpi-card,.promo-card,.summary-box,.prod-card{box-shadow:var(--shadow-soft);}
+.info-card,.branch-card,.form-card,.panel,.kpi-card,.promo-card,.summary-box{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;}
+.info-card:hover,.branch-card:hover,.promo-card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(18,33,61,.10);border-color:rgba(201,162,39,.45);}
+.panel{padding:24px;}
+.panel-head{min-height:28px;}
+
+/* Product discovery is the main engagement surface. */
+.prod-grid{gap:18px;}
+.prod-card{border-radius:14px;box-shadow:0 4px 16px rgba(18,33,61,.045);}
+.prod-card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(18,33,61,.12);border-color:rgba(201,162,39,.42);}
+.prod-thumb{height:150px;background-color:var(--surface-soft);}
+.prod-thumb img{transition:transform .25s ease;}
+.prod-card:hover .prod-thumb img{transform:scale(1.035);}
+.prod-body{padding:16px 16px 17px;}
+.prod-body h4{font-size:15px;line-height:1.3;}
+.prod-body .desc{min-height:35px;}
+.prod-body .stock{min-height:18px;}
+.prod-body .price-row{padding-top:14px;gap:10px;}
+.prod-body .price{font-size:14px;}
+.prod-body .price-row .btn{min-width:76px;}
+.prod-thumb .disc-tag{box-shadow:0 4px 10px rgba(217,80,62,.20);}
+
+.filter-chips{padding-bottom:2px;}
+.chip{min-height:34px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s ease;}
+.chip:hover{border-color:var(--gold);color:var(--ink);transform:translateY(-1px);}
+.chip.active{box-shadow:0 4px 12px rgba(18,33,61,.12);}
+.search-box input{min-height:40px;box-shadow:0 2px 10px rgba(18,33,61,.035);}
+.search-box input:focus{box-shadow:var(--focus-ring);}
+
+/* Clearer conversion actions and feedback. */
+.btn{min-height:40px;box-shadow:none;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(201,162,39,.18);}
+.btn-primary:active{transform:translateY(0);}
+.btn-dark:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px);}
+.btn:focus-visible{box-shadow:var(--focus-ring);}
+.qty-ctrl{min-height:34px;overflow:hidden;background:var(--paper);}
+.qty-ctrl button{height:32px;width:32px;}
+.qty-ctrl button:hover{background:var(--surface-soft);color:var(--gold-deep);}
+.icon-btn{transition:all .15s ease;}
+.icon-btn:hover{background:var(--surface-soft);transform:translateY(-1px);}
+
+/* Checkout keeps the total visible while the user reviews payment details. */
+@media (min-width:981px){
+  .summary-box{position:sticky;top:88px;align-self:start;}
+}
+.summary-box{box-shadow:0 10px 28px rgba(18,33,61,.08);}
+.summary-line.total{font-size:17px;padding-bottom:2px;}
+
+/* Forms: stronger labels, clearer errors/focus, comfortable touch targets. */
+.field input,.field select,.field textarea{min-height:42px;}
+.field textarea{min-height:100px;resize:vertical;}
+.field input::placeholder,.field textarea::placeholder{color:#9AA0A8;}
+
+/* Tables remain dense but become easier to scan. */
+thead th{padding-top:2px;}
+tbody tr{transition:background-color .12s ease;}
+
+/* Toasts feel like deliberate feedback rather than interruptions. */
+.toast{min-width:260px;max-width:min(420px,calc(100vw - 32px));backdrop-filter:blur(8px);}
+
+/* Mobile: retain primary actions and make the app shell comfortable to use. */
+@media (max-width:980px){
+  .app-main{padding-left:24px;padding-right:24px;}
+  .hero-actions{display:flex;}
+  .hero-grid{gap:34px;}
+  .hero p{max-width:620px;}
+  .app-topbar{padding-top:2px;}
+}
+
+@media (max-width:640px){
+  .site-nav{padding:12px 14px;gap:8px;}
+  .site-nav .brand{font-size:18px;gap:8px;}
+  .site-nav .brand-mark{width:28px;height:28px;}
+  .nav-cta{gap:5px;}
+  .nav-cta .btn{padding:7px 9px;font-size:11px;}
+  .nav-cta .theme-toggle{width:32px;height:32px;font-size:13px;}
+  .hero{padding:48px 20px 42px;}
+  .hero h1{font-size:39px;}
+  .hero p{font-size:15px;}
+  .hero-actions{width:100%;gap:9px;}
+  .hero-actions .btn{flex:1 1 140px;}
+  .section-head h2{font-size:31px;}
+  .app-main{padding-left:14px;padding-right:14px;}
+  .app-topbar h2{font-size:24px;}
+  .panel{padding:17px;}
+  .prod-grid{gap:12px;}
+  .prod-thumb{height:170px;}
+  .promo-banner{padding:22px;}
+  .toast-wrap{right:16px;bottom:16px;left:16px;}
+  .toast{min-width:0;width:100%;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto !important;transition-duration:.01ms !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;}
+}
+
+/* ============================================================================================
+   ENGAGEMENT MOTION â€” UI/UX ONLY
+   Marketing pages use entrance motion when navigation reveals a page. No business logic changes.
+   ============================================================================================ */
+:root{
+  --motion-ease:cubic-bezier(.22,1,.36,1);
+  --motion-fast:180ms;
+  --motion-base:520ms;
+}
+
+/* The About page gets a deliberate reveal instead of appearing abruptly after a nav click. */
+#page-about:not(.hidden){
+  animation:aboutPageReveal var(--motion-base) var(--motion-ease) both;
+}
+
+#page-about:not(.hidden) .section-head{
+  animation:aboutHeaderReveal 620ms var(--motion-ease) 70ms both;
+}
+
+#page-about:not(.hidden) .section-head .eyebrow{
+  animation:aboutEyebrowReveal 500ms var(--motion-ease) 120ms both;
+}
+
+#page-about:not(.hidden) .info-card{
+  animation:aboutCardReveal 600ms var(--motion-ease) both;
+  animation-delay:calc(140ms + (var(--card-index, 0) * 70ms));
+  will-change:transform,opacity;
+}
+
+#page-about:not(.hidden) .info-card:nth-child(1){--card-index:0;}
+#page-about:not(.hidden) .info-card:nth-child(2){--card-index:1;}
+#page-about:not(.hidden) .info-card:nth-child(3){--card-index:2;}
+#page-about:not(.hidden) .info-card:nth-child(4){--card-index:3;}
+#page-about:not(.hidden) .info-card:nth-child(5){--card-index:4;}
+#page-about:not(.hidden) .info-card:nth-child(6){--card-index:5;}
+
+#page-about:not(.hidden) .info-card .ico{
+  animation:aboutIconPop 520ms var(--motion-ease) both;
+  animation-delay:calc(280ms + (var(--card-index, 0) * 70ms));
+}
+
+/* A restrained sweep gives the section a premium, polished arrival without being distracting. */
+#page-about:not(.hidden) .section::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 -20%;
+  width:28%;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(201,162,39,.07),transparent);
+  transform:skewX(-14deg) translateX(-140%);
+  animation:aboutLightSweep 900ms var(--motion-ease) 120ms both;
+}
+
+#page-about .section{overflow:hidden;}
+#page-about .section-head,
+#page-about .card-grid{position:relative;z-index:1;}
+
+/* Keep hover motion separate from entrance motion so cards remain interactive afterward. */
+#page-about .info-card:hover{
+  transform:translateY(-5px) scale(1.008);
+  transition:transform 180ms var(--motion-ease),box-shadow 180ms ease,border-color 180ms ease;
+}
+
+@keyframes aboutPageReveal{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes aboutHeaderReveal{
+  from{opacity:0;transform:translateY(22px);clip-path:inset(0 0 18% 0);}
+  to{opacity:1;transform:translateY(0);clip-path:inset(0 0 0 0);}
+}
+
+@keyframes aboutEyebrowReveal{
+  from{opacity:0;letter-spacing:.22em;transform:translateX(-10px);}
+  to{opacity:1;letter-spacing:normal;transform:translateX(0);}
+}
+
+@keyframes aboutCardReveal{
+  from{opacity:0;transform:translateY(30px) scale(.965);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+@keyframes aboutIconPop{
+  0%{opacity:0;transform:scale(.55) rotate(-8deg);}
+  65%{opacity:1;transform:scale(1.08) rotate(2deg);}
+  100%{opacity:1;transform:scale(1) rotate(0);}
+}
+
+@keyframes aboutLightSweep{
+  from{transform:skewX(-14deg) translateX(-140%);}
+  to{transform:skewX(-14deg) translateX(560%);}
+}
+
+/* Motion remains comfortable and accessible for people who request less animation. */
+@media (prefers-reduced-motion:reduce){
+  #page-about:not(.hidden),
+  #page-about:not(.hidden) .section-head,
+  #page-about:not(.hidden) .section-head .eyebrow,
+  #page-about:not(.hidden) .info-card,
+  #page-about:not(.hidden) .info-card .ico,
+  #page-about:not(.hidden) .section::before{
+    animation:none !important;
+    transform:none !important;
+    clip-path:none !important;
+  }
+}
+
+/* ============================================================================================
+   SYSTEM-WIDE MOTION â€” UI/UX ONLY
+   Applies one consistent motion language across public pages, customer pages, admin pages,
+   feedback states, dialogs and dynamic content. No functionality or business logic changes.
+   ============================================================================================ */
+:root{
+  --motion-ease:cubic-bezier(.22,1,.36,1);
+  --motion-soft:cubic-bezier(.25,.8,.25,1);
+  --motion-page:560ms;
+  --motion-content:460ms;
+}
+
+/* Every page transition gets a soft entrance. About keeps its dedicated choreography above. */
+.page:not(.hidden):not(#page-about){
+  animation:systemPageEnter var(--motion-page) var(--motion-ease) both;
+}
+
+/* Public page sections reveal in sequence without moving the whole layout excessively. */
+.page:not(.hidden):not(#page-about) > .section,
+.page:not(.hidden):not(#page-about) > .hero,
+.page:not(.hidden):not(#page-about) > .directory,
+.page:not(.hidden):not(#page-about) > .promo-banner{
+  animation:systemSectionEnter var(--motion-content) var(--motion-ease) both;
+}
+
+.page:not(.hidden):not(#page-about) > .section:nth-child(2){animation-delay:70ms;}
+.page:not(.hidden):not(#page-about) > .section:nth-child(3){animation-delay:130ms;}
+.page:not(.hidden):not(#page-about) > .section:nth-child(4){animation-delay:190ms;}
+
+/* App shell: heading first, then the content surfaces. */
+.page:not(.hidden) .app-topbar{
+  animation:systemHeaderEnter 480ms var(--motion-ease) both;
+}
+
+.page:not(.hidden) .panel,
+.page:not(.hidden) .summary-box,
+.page:not(.hidden) .promo-banner,
+.page:not(.hidden) .kpi-card,
+.page:not(.hidden) .form-card,
+.page:not(.hidden) .promo-card,
+.page:not(.hidden) .branch-card{
+  animation:systemSurfaceEnter 480ms var(--motion-ease) both;
+}
+
+.page:not(.hidden) .panel:nth-child(2),
+.page:not(.hidden) .summary-box:nth-child(2),
+.page:not(.hidden) .kpi-card:nth-child(2){animation-delay:50ms;}
+.page:not(.hidden) .panel:nth-child(3),
+.page:not(.hidden) .summary-box:nth-child(3),
+.page:not(.hidden) .kpi-card:nth-child(3){animation-delay:100ms;}
+
+/* Product/category cards enter as a gentle cascade when a grid is rendered or refreshed. */
+.page:not(.hidden) .prod-grid .prod-card,
+.page:not(.hidden) .card-grid .info-card,
+.page:not(.hidden) .card-grid > *{
+  animation:systemCardEnter 500ms var(--motion-ease) both;
+}
+
+.page:not(.hidden) .prod-grid .prod-card:nth-child(1),
+.page:not(.hidden) .card-grid > :nth-child(1){animation-delay:50ms;}
+.page:not(.hidden) .prod-grid .prod-card:nth-child(2),
+.page:not(.hidden) .card-grid > :nth-child(2){animation-delay:90ms;}
+.page:not(.hidden) .prod-grid .prod-card:nth-child(3),
+.page:not(.hidden) .card-grid > :nth-child(3){animation-delay:130ms;}
+.page:not(.hidden) .prod-grid .prod-card:nth-child(4),
+.page:not(.hidden) .card-grid > :nth-child(4){animation-delay:170ms;}
+.page:not(.hidden) .prod-grid .prod-card:nth-child(5),
+.page:not(.hidden) .card-grid > :nth-child(5){animation-delay:210ms;}
+.page:not(.hidden) .prod-grid .prod-card:nth-child(6),
+.page:not(.hidden) .card-grid > :nth-child(6){animation-delay:250ms;}
+
+/* Product image treatment: motion reinforces that the image is interactive, not decorative noise. */
+.prod-card .prod-thumb{overflow:hidden;}
+.prod-card .prod-thumb img{transition:transform 420ms var(--motion-ease),filter 420ms ease;}
+.prod-card:hover .prod-thumb img{transform:scale(1.045);}
+
+/* Buttons, links and controls get responsive feedback on interaction. */
+.btn,
+.icon-btn,
+.qty-ctrl button,
+.theme-toggle,
+.nav-link,
+.nav-menu-toggle,
+.chip{
+  transition:transform 180ms var(--motion-soft),box-shadow 180ms ease,
+              background-color 180ms ease,color 180ms ease,border-color 180ms ease;
+}
+
+.btn:active,
+.icon-btn:active,
+.qty-ctrl button:active,
+.theme-toggle:active,
+.nav-menu-toggle:active,
+.chip:active{
+  transform:scale(.97);
+}
+
+/* Active navigation has a subtle directional cue. */
+.nav-link::after{
+  transition:width 220ms var(--motion-ease),left 220ms var(--motion-ease);
+}
+.nav-link:hover::after{width:70%;}
+.nav-link.active::after{width:100%;}
+
+/* Search/filter interactions feel responsive without delaying the user's action. */
+.search-box,
+.field input,
+.field select,
+.field textarea{
+  transition:border-color 180ms ease,box-shadow 220ms ease,transform 180ms var(--motion-soft);
+}
+.search-box:focus-within{transform:translateY(-1px);}
+.field:focus-within label{transform:translateX(2px);}
+
+/* Quantity controls and cart actions acknowledge each change visually. */
+.qty-ctrl button:hover{transform:scale(1.04);}
+.cart-row,
+.table-row,
+tbody tr{
+  transition:background-color 180ms ease,transform 180ms var(--motion-soft),box-shadow 180ms ease;
+}
+tbody tr:hover{transform:translateX(2px);}
+
+/* Empty/loading/feedback surfaces use the same calm entrance. */
+.empty-state,
+.loading-state,
+.error-state,
+.success-state{
+  animation:systemFadeUp 420ms var(--motion-ease) both;
+}
+
+/* Modal opens with backdrop fade + dialog lift/scale. */
+.modal-overlay{
+  animation:systemOverlayIn 180ms ease both;
+}
+.modal-box{
+  animation:systemModalIn 420ms var(--motion-ease) both;
+}
+
+/* Toasts enter from the side and settle quickly so feedback remains unobtrusive. */
+.toast{
+  animation:systemToastIn 360ms var(--motion-ease) both;
+}
+
+/* Dropdowns/mobile navigation get a small spring-like reveal. */
+.nav-links.open,
+.user-sidebar.open,
+.admin-sidebar.open{
+  animation:systemMenuIn 300ms var(--motion-ease) both;
+}
+
+@keyframes systemPageEnter{
+  from{opacity:0;transform:translateY(12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes systemSectionEnter{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes systemHeaderEnter{
+  from{opacity:0;transform:translateY(12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes systemSurfaceEnter{
+  from{opacity:0;transform:translateY(16px) scale(.992);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+@keyframes systemCardEnter{
+  from{opacity:0;transform:translateY(20px) scale(.975);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+@keyframes systemFadeUp{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes systemOverlayIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+@keyframes systemModalIn{
+  from{opacity:0;transform:translateY(22px) scale(.965);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+@keyframes systemToastIn{
+  from{opacity:0;transform:translateX(22px) scale(.97);}
+  to{opacity:1;transform:translateX(0) scale(1);}
+}
+
+@keyframes systemMenuIn{
+  from{opacity:0;transform:translateY(-8px) scale(.985);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+/* Reduced motion: preserve instant state changes and all functionality. */
+@media (prefers-reduced-motion:reduce){
+  .page:not(.hidden),
+  .page:not(.hidden) > .section,
+  .page:not(.hidden) > .hero,
+  .page:not(.hidden) > .directory,
+  .page:not(.hidden) > .promo-banner,
+  .page:not(.hidden) .app-topbar,
+  .page:not(.hidden) .panel,
+  .page:not(.hidden) .summary-box,
+  .page:not(.hidden) .promo-banner,
+  .page:not(.hidden) .kpi-card,
+  .page:not(.hidden) .form-card,
+  .page:not(.hidden) .promo-card,
+  .page:not(.hidden) .branch-card,
+  .page:not(.hidden) .prod-grid .prod-card,
+  .page:not(.hidden) .card-grid .info-card,
+  .page:not(.hidden) .card-grid > *,
+  .empty-state,
+  .loading-state,
+  .error-state,
+  .success-state,
+  .modal-overlay,
+  .modal-box,
+  .toast,
+  .nav-links.open,
+  .user-sidebar.open,
+  .admin-sidebar.open{
+    animation:none !important;
+    transform:none !important;
+  }
+
+  .prod-card .prod-thumb img,
+  .btn,
+  .icon-btn,
+  .qty-ctrl button,
+  .theme-toggle,
+  .nav-link,
+  .nav-menu-toggle,
+  .chip,
+  .search-box,
+  .field input,
+  .field select,
+  .field textarea{
+    transition:none !important;
+  }
+}
+
+/* ============================================================
+   AUTH TRANSITION — login / logout / sign up (about 1.3s)
+   ============================================================ */
+.auth-transition{
+  position:fixed;inset:0;z-index:190;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 42%, var(--navy-2) 0%, var(--navy) 45%, var(--navy-3) 100%);
+  color:var(--cream);
+  opacity:0;
+  animation:authTxOverlay 1.3s cubic-bezier(.4,0,.2,1) forwards;
+}
+.auth-tx-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;
+  animation:authTxInner 1.3s cubic-bezier(.22,.8,.3,1) forwards;}
+.auth-tx-mark{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center;margin-bottom:26px;}
+.auth-tx-mark svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible;}
+.auth-tx-track{fill:none;stroke:rgba(231,205,122,.18);stroke-width:2;}
+.auth-tx-ring{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-linecap:round;
+  stroke-dasharray:189;stroke-dashoffset:189;
+  animation:authTxRing .8s .1s cubic-bezier(.65,0,.35,1) forwards;
+  filter:drop-shadow(0 0 6px rgba(201,162,39,.55));}
+.auth-tx-letter{font-family:'Fraunces',serif;font-size:36px;font-weight:600;color:var(--gold-light);
+  opacity:0;animation:authTxPop .5s .15s cubic-bezier(.34,1.56,.64,1) forwards;}
+.auth-tx-ripple{position:absolute;inset:14px;border-radius:50%;border:1.5px solid var(--gold);opacity:0;
+  animation:authTxRipple 1s .3s ease-out forwards;}
+.auth-tx-ripple-2{animation-delay:.5s;}
+.auth-tx-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;letter-spacing:-0.005em;
+  opacity:0;animation:authTxRise .5s .3s ease-out forwards;}
+.auth-tx-dots i{font-style:normal;opacity:0;animation:authTxDot .9s ease-in-out infinite;}
+.auth-tx-dots i:nth-child(2){animation-delay:.15s;}
+.auth-tx-dots i:nth-child(3){animation-delay:.3s;}
+.auth-tx-sub{margin-top:6px;font-size:13.5px;color:rgba(250,247,240,.68);
+  opacity:0;animation:authTxRise .5s .42s ease-out forwards;}
+.auth-tx-bar{margin-top:26px;width:180px;height:3px;border-radius:999px;background:rgba(250,247,240,.14);overflow:hidden;
+  opacity:0;animation:authTxRise .4s .3s ease-out forwards;}
+.auth-tx-bar span{display:block;height:100%;width:100%;border-radius:inherit;transform-origin:left center;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+  animation:authTxBar .85s .2s cubic-bezier(.45,0,.2,1) forwards;}
+
+/* Logout plays the same motion in reverse: the ring and bar unwind. */
+.auth-transition.is-logout .auth-tx-ring{stroke-dashoffset:0;animation:authTxRingOut .8s .1s cubic-bezier(.65,0,.35,1) forwards;}
+.auth-transition.is-logout .auth-tx-bar span{transform:scaleX(1);transform-origin:right center;animation:authTxBarOut .85s .2s cubic-bezier(.45,0,.2,1) forwards;}
+
+@keyframes authTxOverlay{0%{opacity:0;}10%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
+@keyframes authTxInner{
+  0%{transform:translateY(14px) scale(.97);}
+  14%{transform:translateY(0) scale(1);}
+  80%{transform:translateY(0) scale(1);opacity:1;}
+  100%{transform:translateY(-10px) scale(1.02);opacity:0;}
+}
+@keyframes authTxRing{to{stroke-dashoffset:0;}}
+@keyframes authTxRingOut{to{stroke-dashoffset:189;}}
+@keyframes authTxPop{from{opacity:0;transform:scale(.55);}to{opacity:1;transform:scale(1);}}
+@keyframes authTxRipple{0%{opacity:.55;transform:scale(.9);}100%{opacity:0;transform:scale(1.7);}}
+@keyframes authTxRise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes authTxDot{0%,100%{opacity:0;}40%,70%{opacity:1;}}
+@keyframes authTxBar{to{transform:scaleX(1);}}
+@keyframes authTxBarOut{to{transform:scaleX(0);}}
+
+/* Reduced motion: same 1.3s cue, but as a gentle fade only. */
+@media (prefers-reduced-motion:reduce){
+  .auth-tx-inner,.auth-tx-ring,.auth-tx-letter,.auth-tx-ripple,.auth-tx-title,.auth-tx-sub,.auth-tx-bar,.auth-tx-bar span,.auth-tx-dots i{animation:none !important;}
+  .auth-tx-ring{stroke-dashoffset:0;}
+  .auth-tx-letter,.auth-tx-title,.auth-tx-sub,.auth-tx-bar,.auth-tx-dots i{opacity:1;}
+  .auth-tx-ripple{display:none;}
+  .auth-tx-bar span{transform:scaleX(1);}
 }
