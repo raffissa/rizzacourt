@@ -5,6 +5,60 @@ const SUPABASE_URL = "https://iwfwiptyxivwskiwgqli.supabase.co";
 const SUPABASE_KEY = "sb_publishable_h_W5SMVPfV71725u5v4Ajw_tl9-qP5w";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ============================================================
+   UI: GLOBAL LOADER, BUTTON LOADING STATES & SKELETONS
+   ============================================================ */
+let globalLoadCount = 0;
+function showGlobalLoader(){
+  globalLoadCount++;
+  document.getElementById("globalLoader")?.classList.add("active");
+}
+function hideGlobalLoader(){
+  globalLoadCount = Math.max(0, globalLoadCount - 1);
+  if(globalLoadCount === 0) document.getElementById("globalLoader")?.classList.remove("active");
+}
+function showBootLoader(){
+  document.getElementById("bootLoader")?.classList.remove("hidden");
+}
+function hideBootLoader(){
+  const el = document.getElementById("bootLoader");
+  if(!el) return;
+  el.classList.add("fade-out");
+  setTimeout(()=>el.classList.add("hidden"), 300);
+}
+/* Puts a button/link into a spinner + disabled "processing" state and
+   restores its original label & enabled state afterwards. Safe on null. */
+function setBtnLoading(btn, loading, loadingLabel){
+  if(!btn) return;
+  if(loading){
+    if(btn.dataset.origHtml===undefined) btn.dataset.origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.setAttribute("aria-busy","true");
+    btn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span><span>${loadingLabel || btn.dataset.origHtml}</span>`;
+  } else {
+    btn.disabled = false;
+    btn.classList.remove("btn-loading");
+    btn.removeAttribute("aria-busy");
+    if(btn.dataset.origHtml!==undefined) btn.innerHTML = btn.dataset.origHtml;
+  }
+}
+/* Best-effort grab of whichever button/link triggered the current inline
+   onclick handler, so row actions (delete/toggle) can show a spinner
+   without every call site needing to pass a button reference through. */
+function currentActionBtn(){
+  try{ return window.event?.target?.closest("button, a.icon-btn"); } catch(err){ return null; }
+}
+function skeletonRows(cols, rows=5){
+  const tds = Array.from({length:cols}).map(()=>`<td><div class="skel skel-line"></div></td>`).join("");
+  return Array.from({length:rows}).map(()=>`<tr>${tds}</tr>`).join("");
+}
+function skeletonCards(n=4){
+  return `<div class="prod-grid">` + Array.from({length:n}).map(()=>
+    `<div class="skel-card"><div class="skel skel-thumb"></div><div style="padding:14px;"><div class="skel skel-line" style="width:40%;height:9px;"></div><div class="skel skel-line" style="width:80%;margin-top:10px;"></div><div class="skel skel-line" style="width:55%;margin-top:8px;"></div></div></div>`
+  ).join("") + `</div>`;
+}
+
 /* ============================================================================================
    STATE — everything lives in memory for this prototype (no real cloud DB / auth in this demo)
    ============================================================================================ */
@@ -307,10 +361,57 @@ let inPasswordRecovery = false;
    ============================================================================================ */
 function toast(msg,icon="✓"){
   const wrap = document.getElementById("toastWrap");
+  const type = icon==="⚠" ? "warning" : icon==="✓" ? "success" : "info";
   const el = document.createElement("div");
-  el.className="toast"; el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span class="toast-ico">${icon}</span><span class="toast-msg">${msg}</span>`;
   wrap.appendChild(el);
-  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(),300); },2600);
+  requestAnimationFrame(()=>el.classList.add("show"));
+  setTimeout(()=>{ el.classList.remove("show"); el.classList.add("hide"); setTimeout(()=>el.remove(),300); },3200);
+}
+
+
+/* ============================================================
+   AUTH TRANSITION (login / logout / sign up)
+   Purely visual: a full-screen branded overlay that plays for
+   ~1.3s on top of the page. It never delays or blocks the auth
+   logic — navigation happens exactly as before, underneath it.
+   ============================================================ */
+const AUTH_TRANSITION_MS = 1300;
+let authTransitionTimer = null;
+function playAuthTransition(kind, detail){
+  const copy = {
+    login:  { title:"Signing you in",        sub: detail || "Preparing your dashboard" },
+    logout: { title:"Signing you out",       sub: detail || "See you again soon" },
+    signup: { title:"Creating your account", sub: detail || "Welcome to Rizza Court" }
+  }[kind] || { title:"One moment", sub:"" };
+
+  let el = document.getElementById("authTransition");
+  if(el) el.remove();
+  clearTimeout(authTransitionTimer);
+
+  el = document.createElement("div");
+  el.id = "authTransition";
+  el.className = "auth-transition is-" + kind;
+  el.setAttribute("role","status");
+  el.setAttribute("aria-live","polite");
+  el.innerHTML = `
+    <div class="auth-tx-inner">
+      <div class="auth-tx-mark">
+        <span class="auth-tx-ripple"></span>
+        <span class="auth-tx-ripple auth-tx-ripple-2"></span>
+        <svg viewBox="0 0 72 72" aria-hidden="true">
+          <circle class="auth-tx-track" cx="36" cy="36" r="30"/>
+          <circle class="auth-tx-ring" cx="36" cy="36" r="30"/>
+        </svg>
+        <span class="auth-tx-letter">R</span>
+      </div>
+      <div class="auth-tx-title">${copy.title}<span class="auth-tx-dots"><i>.</i><i>.</i><i>.</i></span></div>
+      <div class="auth-tx-sub">${copy.sub}</div>
+      <div class="auth-tx-bar"><span></span></div>
+    </div>`;
+  document.body.appendChild(el);
+  authTransitionTimer = setTimeout(()=>{ el.remove(); }, AUTH_TRANSITION_MS + 60);
 }
 
 const MARKETING_PAGES = ["landing","about","locations","contact"];
@@ -344,6 +445,7 @@ function gotoPage(pageId){
    and the cached tab/page keys; we still navigate immediately so the UI
    doesn't wait on that async event to feel responsive. */
 async function performLogout(){
+  playAuthTransition("logout");
   try {
     await supabaseClient.auth.signOut();
   } catch(err) {
@@ -524,6 +626,7 @@ document.getElementById("loginForm").addEventListener("submit",async (e)=>{
     return;
   }
 
+  playAuthTransition("login", profile.role === "admin" ? "Opening the admin console" : "Opening your shopping court");
   toast(`Welcome back, ${state.currentUser.name.split(" ")[0] || "User"}!`);
   gotoPage(profile.role === "admin" ? "app-admin" : "app-user");
   if(profile.role === "admin") setAdminTab("overview");
@@ -583,6 +686,7 @@ document.getElementById("signupForm").addEventListener("submit", async (e) => {
 
   e.target.reset();
 
+  playAuthTransition("signup");
   gotoPage("login");
   selectLoginRole("user");
 });
