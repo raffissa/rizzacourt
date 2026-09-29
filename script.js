@@ -2764,3 +2764,103 @@ async function initializeOnlineData(){
 }
 
 initializeOnlineData();
+
+/* UX enhancement layer — additive only. Adds accessibility + keyboard behaviour.
+   Never calls or replaces app functions; only sets attributes and forwards native events. */
+(function(){
+  const $ = (s,r=document)=>r.querySelector(s), $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+  /* Announce toasts to screen readers */
+  const tw = $("#toastWrap"); if(tw){ tw.setAttribute("role","status"); tw.setAttribute("aria-live","polite"); }
+
+  /* Autocomplete hints so browsers/password managers fill forms faster */
+  const ac = {loginEmail:"username",loginPassword:"current-password",suName:"name",suUsername:"username",
+    suEmail:"email",suPhone:"tel",suAddress:"street-address",suPassword:"new-password",suConfirm:"new-password",
+    resetNewPassword:"new-password",resetConfirmPassword:"new-password"};
+  Object.entries(ac).forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.setAttribute("autocomplete",v); });
+
+  /* Enhance whatever is currently in the DOM (app screens are re-rendered often) */
+  let n = 0;
+  function enhance(root=document){
+    $$(".side-link[data-admin-tab],.side-link[data-user-tab]",root).forEach(a=>{
+      a.setAttribute("role","link"); a.tabIndex = 0;
+      a.toggleAttribute("aria-current",false);
+      if(a.classList.contains("active")) a.setAttribute("aria-current","page");
+    });
+    $$(".role-card",root).forEach(c=>{
+      c.setAttribute("role","radio"); c.tabIndex = 0;
+      c.setAttribute("aria-checked", String(c.classList.contains("selected")));
+    });
+    $$(".em,.ico,.emoji,.toast-ico",root).forEach(e=>e.setAttribute("aria-hidden","true"));
+    $$(".field",root).forEach(f=>{                       // tie labels to inputs
+      const l=f.querySelector("label"), i=f.querySelector("input,select,textarea");
+      if(l && i && !l.htmlFor){ if(!i.id) i.id="uxf"+(++n); l.htmlFor=i.id; }
+    });
+    $$(".app-main table",root).forEach(t=>{              // label cells so tables can stack as cards on phones
+      const hs=[...t.querySelectorAll("thead th")].map(h=>h.textContent.trim());
+      if(!hs.length) return;
+      t.classList.add("ux-cards");
+      t.querySelectorAll("tbody tr").forEach(r=>{
+        if(r.children.length!==hs.length) return;
+        [...r.children].forEach((c,i)=>{ if(!c.hasAttribute("data-label")) c.setAttribute("data-label",hs[i]); });
+      });
+    });
+    $$("#loginEmail,#suUsername,#suEmail",root).forEach(i=>{ i.setAttribute("autocapitalize","none"); i.setAttribute("autocorrect","off"); i.spellcheck=false; });
+    const ph=document.getElementById("suPhone"); if(ph) ph.setAttribute("inputmode","tel");
+    $$("button.theme-toggle,.nav-menu-toggle,.sidebar-toggle",root).forEach(b=>{ if(!b.type) b.type="button"; });
+  }
+  enhance();
+  let raf; new MutationObserver(()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>enhance()); })
+    .observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+
+  /* Keyboard: Enter/Space activates div/anchor controls exactly like a click */
+  document.addEventListener("keydown",e=>{
+    const t=e.target;
+    if((e.key==="Enter"||e.key===" ") && t.matches?.(".side-link[role=link],.role-card")){ e.preventDefault(); t.click(); }
+    if(e.key==="Escape"){
+      const modal=$(".modal-overlay");
+      if(modal){ ($("#modalCancelBtn",modal)||{click:()=>modal.remove()}).click(); return; }
+      closeMobileSidebar?.(); closeMobileNav?.();
+    }
+    if(e.key==="Tab"){                                   // keep focus inside an open dialog
+      const modal=$(".modal-overlay"); if(!modal) return;
+      const f=$$("button,input,select,textarea,a[href],[tabindex]:not([tabindex='-1'])",modal).filter(x=>!x.disabled&&x.offsetParent);
+      if(!f.length) return;
+      const first=f[0], last=f[f.length-1];
+      if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+    }
+  });
+
+  /* Dialogs: semantics, initial focus, and focus restored to the trigger on close */
+  let opener=null;
+  new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      m.addedNodes.forEach(nd=>{
+        if(nd.nodeType===1 && nd.classList.contains("modal-overlay")){
+          opener=document.activeElement;
+          const box=$(".modal-box",nd), h=$("h3",nd);
+          box.setAttribute("role","dialog"); box.setAttribute("aria-modal","true");
+          if(h){ h.id="uxModalTitle"; box.setAttribute("aria-labelledby","uxModalTitle"); }
+          setTimeout(()=>($("input:not([type=hidden]),select,textarea",nd)||$("#modalSaveBtn,#modalCancelBtn",nd))?.focus(),30);
+        }
+      });
+      m.removedNodes.forEach(nd=>{
+        if(nd.nodeType===1 && nd.classList?.contains("modal-overlay") && opener?.isConnected) opener.focus?.();
+      });
+    });
+  }).observe(document.body,{childList:true});
+
+  /* Validation: mark invalid fields (border + icon + message), clear as the user fixes them.
+     Native validation still runs, and typed values are never touched. */
+  document.addEventListener("invalid",e=>{
+    const el=e.target; el.setAttribute("aria-invalid","true");
+    let msg=el.parentElement.querySelector(".field-error");
+    if(!msg){ msg=document.createElement("div"); msg.className="field-error"; msg.id=(el.id||"uxf"+(++n))+"-err"; el.parentElement.appendChild(msg); }
+    msg.textContent=el.validationMessage; el.setAttribute("aria-describedby",msg.id);
+  },true);
+  document.addEventListener("input",e=>{
+    const el=e.target; if(el.getAttribute?.("aria-invalid")!=="true") return;
+    if(el.checkValidity()){ el.removeAttribute("aria-invalid"); el.parentElement.querySelector(".field-error")?.remove(); }
+  });
+})();
