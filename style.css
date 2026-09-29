@@ -243,7 +243,7 @@ tbody tr:hover{background:var(--row-hover);}
 .prod-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:.15s;}
 .prod-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
 .prod-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden;cursor:pointer;}
-.prod-thumb:hover::after{content:"ðŸ” View";position:absolute;inset:0;background:rgba(11,22,38,0.5);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.prod-thumb:hover::after{content:"Ã°Å¸â€Â View";position:absolute;inset:0;background:rgba(11,22,38,0.5);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;}
 .prod-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .prod-thumb .disc-tag{position:absolute;top:9px;left:9px;background:var(--coral);color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;font-family:'IBM Plex Mono',monospace;z-index:2;}
 .prod-body{padding:14px 14px 16px;flex:1;display:flex;flex-direction:column;}
@@ -392,7 +392,7 @@ tbody tr:hover{background:var(--row-hover);}
 }
 
 /* ============================================================
-   REFINEMENT LAYER â€” UI/UX ONLY
+   REFINEMENT LAYER Ã¢â‚¬â€ UI/UX ONLY
    Preserves the existing component structure and functionality.
    ============================================================ */
 :root{
@@ -517,7 +517,7 @@ tbody tr{transition:background-color .12s ease;}
 }
 
 /* ============================================================================================
-   ENGAGEMENT MOTION â€” UI/UX ONLY
+   ENGAGEMENT MOTION Ã¢â‚¬â€ UI/UX ONLY
    Marketing pages use entrance motion when navigation reveals a page. No business logic changes.
    ============================================================================================ */
 :root{
@@ -625,7 +625,7 @@ tbody tr{transition:background-color .12s ease;}
 }
 
 /* ============================================================================================
-   SYSTEM-WIDE MOTION â€” UI/UX ONLY
+   SYSTEM-WIDE MOTION Ã¢â‚¬â€ UI/UX ONLY
    Applies one consistent motion language across public pages, customer pages, admin pages,
    feedback states, dialogs and dynamic content. No functionality or business logic changes.
    ============================================================================================ */
@@ -874,7 +874,7 @@ tbody tr:hover{transform:translateX(2px);}
 }
 
 /* ============================================================
-   AUTH TRANSITION — login / logout / sign up (about 1.3s)
+   AUTH TRANSITION â€” login / logout / sign up (about 1.3s)
    ============================================================ */
 .auth-transition{
   position:fixed;inset:0;z-index:190;pointer-events:none;
@@ -939,3 +939,753 @@ tbody tr:hover{transform:translateX(2px);}
   .auth-tx-ripple{display:none;}
   .auth-tx-bar span{transform:scaleX(1);}
 }
+
+/* ==========================================================================
+   MOBILE-FIRST RESPONSIVE HARDENING
+   Layout/styling only. Existing application logic, APIs, authentication,
+   roles, database behavior, and workflows remain unchanged.
+   ========================================================================== */
+
+/* Prevent flex/grid children from forcing their parent wider than the viewport. */
+.site-nav > *,
+.hero-grid > *,
+.section > *,
+.contact-grid > *,
+.app-shell > *,
+.app-main > *,
+.app-topbar > *,
+.panel > *,
+.split-panel > *,
+.chart-row > *,
+.prod-card > *,
+.cart-line > *,
+.summary-box > * {
+  min-width: 0;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.nav-link,
+.side-link,
+.chip,
+.icon-btn,
+.qty-ctrl button,
+.theme-toggle,
+.nav-menu-toggle,
+.role-card {
+  touch-action: manipulation;
+}
+
+/* Keep interactive controls comfortably tappable without changing their actions. */
+@media (pointer: coarse) {
+  .side-link,
+  .nav-link,
+  .btn,
+  .chip,
+  .icon-btn,
+  .theme-toggle,
+  .nav-menu-toggle,
+  .qty-ctrl button,
+  .role-card {
+    min-height: 44px;
+  }
+
+  .qty-ctrl button {
+    min-width: 42px;
+    height: 42px;
+  }
+
+  .qty-ctrl span {
+    width: 34px;
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Mobile navigation actions are hidden from desktop; they reuse the same
+   data-goto navigation handler as the existing Login/Sign Up buttons. */
+.mobile-nav-action {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .site-nav {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+
+  .nav-links.open .mobile-nav-action {
+    display: block;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(250,247,240,0.08);
+  }
+
+  .nav-links.open .mobile-nav-action-primary {
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+
+  .hero-grid,
+  .contact-grid,
+  .split-panel,
+  .chart-row {
+    min-width: 0;
+  }
+
+  .app-main {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .search-box {
+    width: min(100%, 420px);
+    min-width: 0;
+  }
+
+  .search-box input {
+    max-width: 100%;
+  }
+
+  /* Dense tables scroll inside their own area instead of widening the page. */
+  .panel:has(> table),
+  .panel .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .panel > table {
+    display: table;
+    min-width: 680px;
+  }
+
+  .panel .table-wrap > table {
+    min-width: 680px;
+  }
+
+  /* Prevent long unbroken values (IDs, emails, URLs) from creating overflow. */
+  .panel td,
+  .panel th,
+  .summary-box,
+  .receipt,
+  .info-card,
+  .branch-card,
+  .form-card,
+  .promo-card,
+  .prod-card {
+    overflow-wrap: anywhere;
+  }
+
+  .receipt {
+    width: 100%;
+  }
+
+  .modal-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 520px;
+    margin: auto 0;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-nav {
+    min-height: 60px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-bottom: 10px;
+  }
+
+  .site-nav .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    white-space: nowrap;
+  }
+
+  .site-nav .brand:not(.foo) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-cta {
+    flex: 0 0 auto;
+  }
+
+  .hero,
+  .section {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .hero h1 {
+    max-width: 100%;
+    font-size: clamp(34px, 10vw, 39px);
+    overflow-wrap: anywhere;
+  }
+
+  .hero p,
+  .section-head p {
+    max-width: 100%;
+  }
+
+  .hero-actions .btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .directory {
+    width: 100%;
+  }
+
+  .directory-row {
+    gap: 9px;
+  }
+
+  .directory-row .lbl {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .directory-row .tag {
+    flex: 0 0 auto;
+  }
+
+  .info-card,
+  .branch-card,
+  .form-card {
+    padding: 20px;
+  }
+
+  .auth-wrap {
+    min-height: 100dvh;
+    padding:
+      max(20px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(20px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    align-items: flex-start;
+  }
+
+  .auth-box {
+    max-width: 100%;
+    padding-top: 4px;
+  }
+
+  .auth-card {
+    padding: 24px 18px;
+    border-radius: 14px;
+  }
+
+  .role-pick {
+    gap: 10px;
+  }
+
+  .role-card {
+    padding: 18px 12px;
+  }
+
+  .checkbox-row {
+    gap: 12px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .app-main {
+    padding-top: 68px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: max(42px, env(safe-area-inset-bottom));
+  }
+
+  .sidebar-toggle {
+    top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+  }
+
+  .app-topbar {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .app-topbar > div,
+  .topbar-actions {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .topbar-actions {
+    width: 100%;
+  }
+
+  .topbar-actions > * {
+    min-width: 0;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .filter-chips {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+    scrollbar-width: thin;
+  }
+
+  .filter-chips .chip {
+    flex: 0 0 auto;
+  }
+
+  .panel {
+    padding: 15px;
+    margin-bottom: 16px;
+  }
+
+  .panel-head {
+    align-items: flex-start;
+  }
+
+  .panel-head > * {
+    min-width: 0;
+  }
+
+  .kpi-grid {
+    gap: 10px;
+  }
+
+  .kpi-card {
+    padding: 15px 13px;
+  }
+
+  .kpi-card .val {
+    font-size: 23px;
+    overflow-wrap: anywhere;
+  }
+
+  .prod-card {
+    min-width: 0;
+  }
+
+  .prod-thumb {
+    height: clamp(150px, 42vw, 190px);
+  }
+
+  .prod-body {
+    padding: 13px;
+  }
+
+  .prod-body h4 {
+    overflow-wrap: anywhere;
+  }
+
+  .prod-body .price-row {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .prod-body .price-row .btn {
+    flex: 1 1 auto;
+  }
+
+  .promo-banner {
+    padding: 19px;
+  }
+
+  .promo-banner > * {
+    min-width: 0;
+  }
+
+  .cart-line {
+    min-width: 0;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .cart-line > * {
+    min-width: 0;
+  }
+
+  .cart-line .thumb {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cart-line .qty-ctrl {
+    max-width: 100%;
+  }
+
+  .summary-line {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .summary-line > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .review-modal-img {
+    height: min(240px, 58vw);
+  }
+
+  .modal-box {
+    padding: 20px 16px;
+    border-radius: 12px;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .modal-close-row {
+    flex-wrap: wrap;
+  }
+
+  .modal-close-row .btn {
+    flex: 1 1 120px;
+  }
+
+  .toast-wrap {
+    right: max(12px, env(safe-area-inset-right));
+    left: max(12px, env(safe-area-inset-left));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .toast {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* At very narrow phone widths, keep the top bar uncluttered. Authentication
+   remains available through the hamburger menu via the mobile-nav-action links. */
+@media (max-width: 480px) {
+  .site-nav {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .site-nav .brand {
+    font-size: 16px;
+    gap: 6px;
+  }
+
+  .site-nav .brand-mark {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+  }
+
+  .nav-cta .btn {
+    display: none;
+  }
+
+  .nav-cta .theme-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-menu-toggle {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(27px, 8vw, 31px);
+  }
+
+  .section-head {
+    margin-bottom: 28px;
+  }
+
+  .card-grid,
+  .prod-grid,
+  .promo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-card .lbl {
+    display: block;
+  }
+
+  .kpi-card .lbl span {
+    display: block;
+  }
+
+  .cart-line {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .cart-line .thumb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-line > *:nth-child(3) {
+    justify-self: start;
+  }
+
+  .cart-line > *:nth-child(4),
+  .cart-line > *:nth-child(5) {
+    text-align: right;
+  }
+
+  .receipt {
+    padding: 18px 14px;
+    font-size: 11.5px;
+  }
+}
+
+/* Landscape phones have more horizontal room: use two columns where practical
+   while keeping portrait phones as single-column layouts. */
+@media (min-width: 480px) and (max-width: 980px) and (orientation: landscape) {
+  .card-grid,
+  .prod-grid,
+  .promo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .hero-actions .btn {
+    flex: 0 1 auto;
+    width: auto;
+  }
+
+  .hero {
+    padding-top: 42px;
+    padding-bottom: 36px;
+  }
+}
+
+/* Small landscape phones should not inherit a desktop-like fixed-height feel. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .auth-wrap {
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .auth-card {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .modal-box {
+    max-height: calc(100dvh - 16px);
+  }
+}
+
+/* Safe-area aware bottom controls and modern viewport units. */
+@supports (padding: max(0px)) {
+  .site-footer {
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Final overflow guard for unexpected long content; normal content remains
+   horizontally responsive rather than requiring page-level scrolling. */
+#site,
+#page-login,
+#page-signup,
+#page-reset-password,
+#page-app-admin,
+#page-app-user {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  #site,
+  #page-login,
+  #page-signup,
+  #page-reset-password,
+  #page-app-admin,
+  #page-app-user {
+    overflow-x: hidden;
+  }
+}
+
+/* ============================================================================================
+   FIXED MOBILE SIDEBAR
+   When the admin/customer burger menu is opened on a minimized window, the sidebar stays
+   fixed to the viewport and scrolls independently from the page. No navigation/business logic
+   or existing authentication animations are changed.
+   ============================================================================================ */
+@media (max-width: 980px) {
+  .app-sidebar {
+    position: fixed !important;
+    inset: 0 auto 0 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    z-index: 65;
+  }
+
+  .app-sidebar.open {
+    position: fixed !important;
+    inset: 0 auto 0 0;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .sidebar-overlay {
+    position: fixed !important;
+    inset: 0;
+    z-index: 60;
+  }
+
+  .sidebar-toggle {
+    position: fixed !important;
+    z-index: 70;
+  }
+}
+
+@supports not (height: 100dvh) {
+  @media (max-width: 980px) {
+    .app-sidebar {
+      height: 100vh;
+      max-height: 100vh;
+    }
+  }
+}
+
+/* UX enhancement layer — additive only. Loaded after style.css; touches no logic. */
+.modal-overlay{animation:uxFade .15s ease-out}
+.modal-box{max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;animation:uxPop .2s var(--motion-ease,ease-out)}
+@keyframes uxFade{from{opacity:0}to{opacity:1}}
+@keyframes uxPop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+
+/* Keyboard focus on non-native controls (sidebar links, role cards) */
+.side-link:focus-visible,.role-card:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;box-shadow:none}
+.side-link[aria-current="page"]{font-weight:600}
+.role-card[aria-checked="true"]{outline:2px solid var(--gold);outline-offset:-2px}
+
+/* Validation: border + marker + message, not colour alone */
+.field input[aria-invalid="true"],.field textarea[aria-invalid="true"],.field select[aria-invalid="true"]{border-color:var(--coral)}
+.field-error{color:var(--coral);font-size:12.5px;margin-top:6px}
+.field-error::before{content:"⚠ "}
+
+/* Toasts never overflow small screens */
+.toast{max-width:min(380px,calc(100vw - 32px))}
+
+/* Tables scroll inside their panel instead of the whole page */
+.panel{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:640px){.panel table{min-width:560px}.toast-wrap{left:16px;right:16px;bottom:16px}}
+
+/* Larger touch targets, press feedback */
+@media (pointer:coarse){.btn,.side-link,.icon-btn,select,input:not([type=checkbox]):not([type=radio]){min-height:44px}}
+.btn:active:not(:disabled){transform:translateY(1px) scale(.99)}
+.btn:disabled{cursor:not-allowed;opacity:.65}
+
+@media (prefers-reduced-motion:reduce){.modal-overlay,.modal-box{animation:none}}
+
+/* ================= SMARTPHONE LAYER ================= */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:clip}
+img,canvas,svg,video{max-width:100%}
+.app-main,.panel,.modal-box,.field{min-width:0}
+.field input,.field select,.field textarea{max-width:100%}
+
+@media (max-width:640px){
+  /* 16px inputs stop iOS from auto-zooming on focus */
+  .field input,.field select,.field textarea,.checkbox-row,input,select,textarea{font-size:16px}
+  .field-row{grid-template-columns:1fr!important;flex-direction:column}
+  .btn{min-height:44px}
+  .panel{padding:16px}
+  .app-main{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+
+  /* Tables become stacked cards; every column stays visible, row actions stay tappable */
+  .panel table.ux-cards{min-width:0;display:block}
+  table.ux-cards thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table.ux-cards tbody{display:block}
+  table.ux-cards tr{display:block;padding:10px 12px;margin-bottom:10px;border:1px solid var(--border);border-radius:10px;background:var(--paper)}
+  table.ux-cards td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:7px 0!important;border:0!important;text-align:right;word-break:break-word}
+  table.ux-cards td::before{content:attr(data-label);flex:0 0 38%;text-align:left;font-size:12px;font-weight:600;color:var(--muted)}
+  table.ux-cards td:not([data-label])::before,table.ux-cards td[data-label=""]::before{content:none}
+  table.ux-cards td:not([data-label]),table.ux-cards td[data-label=""]{justify-content:flex-end;flex-wrap:wrap}
+  table.ux-cards .btn,table.ux-cards .icon-btn{min-height:40px;min-width:40px}
+
+  /* Dialogs become bottom sheets: fit the screen, scroll inside, actions always reachable */
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal-box{width:100%;max-width:100%;max-height:92dvh;border-radius:16px 16px 0 0;padding-bottom:0;animation:uxSheet .22s var(--motion-ease,ease-out)}
+  .modal-close-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0 calc(12px + env(safe-area-inset-bottom));margin-top:12px;display:flex;gap:10px}
+  .modal-close-row .btn{flex:1;min-height:46px}
+}
+@keyframes uxSheet{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+
+/* Landscape phones: little vertical room, so dialogs use all of it */
+@media (max-height:500px) and (orientation:landscape){
+  .modal-overlay{align-items:center;padding:8px}
+  .modal-box{max-height:100dvh;border-radius:12px}
+}
+/* Very narrow phones (≤360px) */
+@media (max-width:360px){
+  .panel{padding:12px}
+  .btn-sm{padding-left:10px;padding-right:10px}
+  .toast{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){.modal-box{animation:none}}
+/* Phones in landscape are wider than 640px but still zoom on <16px inputs */
+@media (pointer:coarse){input,select,textarea{font-size:16px}}
+
+/* ===== Sidebar stays pinned to the screen when the window is narrow =====
+   Cause: .page's entrance animation (fill-mode "both") leaves transform:translateY(0) on the
+   app page, which turns it into the containing block for position:fixed children, so the
+   sidebar, its overlay and the menu button scrolled away with the content.
+   Fix: app pages fade in with opacity only (no transform), so fixed elements anchor to the viewport. */
+@keyframes uxPageFade{from{opacity:0}to{opacity:1}}
+.page#page-app-admin:not(.hidden):not(#page-about),.page#page-app-user:not(.hidden):not(#page-about){
+  animation:uxPageFade .3s ease-out backwards;transform:none;filter:none;will-change:auto;contain:none;
+}
+@media (max-width:980px){
+  .app-sidebar{position:fixed!important;top:0;left:0;bottom:0;height:100dvh;
+    padding-top:max(22px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));
+    overflow-y:auto;overscroll-behavior:contain;will-change:transform;
+    transition:transform .25s var(--motion-ease,ease),box-shadow .25s ease}
+  .sidebar-toggle{position:fixed!important}
+  .sidebar-overlay{position:fixed!important;inset:0}
+  /* Page behind the drawer doesn't scroll while it is open */
+  body:has(.app-sidebar.open){overflow:hidden}
+}
+@media (min-width:981px){ .app-sidebar{position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto} }
+@media (prefers-reduced-motion:reduce){.page#page-app-admin:not(.hidden):not(#page-about),.page#page-app-user:not(.hidden):not(#page-about){animation:none}.app-sidebar{transition:none}}
